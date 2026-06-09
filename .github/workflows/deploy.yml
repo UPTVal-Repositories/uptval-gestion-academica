@@ -1,0 +1,55 @@
+name: Deploy Web Application to EC2
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Executing Remote SSH Commands to Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            PROJECT_DIR="web-app"
+            cd /home/ec2-user
+            
+            # 1. Si el proyecto existe, respaldar el .env y apagar la infraestructura
+            if [ -d "$PROJECT_DIR" ]; then
+              # Respaldo de seguridad del .env en la raíz del servidor
+              if [ -f "$PROJECT_DIR/.env" ]; then
+                cp $PROJECT_DIR/.env /home/ec2-user/.env.backup
+              fi
+              
+              cd $PROJECT_DIR
+              # Apagamos SIN el -v para NO borrar la base de datos MySQL 9.0
+              docker-compose down --remove-orphans
+              cd ..
+              rm -rf $PROJECT_DIR
+            fi
+            
+            # 2. Clonar el repositorio limpio usando el token nativo de GitHub Actions
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $PROJECT_DIR
+            
+            cd $PROJECT_DIR
+            
+            # 3. Restaurar el archivo .env desde el respaldo
+            if [ -f "/home/ec2-user/.env.backup" ]; then
+              cp /home/ec2-user/.env.backup .env
+            else
+              # Si es la primera vez, copiamos el de ejemplo para que no falle (luego deberás editarlo manual)
+              cp .env.example .env
+            fi
+            
+            # 4. Levantar la nueva versión
+            docker-compose up -d --build --force-recreate
