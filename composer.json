@@ -1,0 +1,9 @@
+{
+    "name": "uptval/gestion-academica",
+    "description": "Sistema de gestion academica",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
