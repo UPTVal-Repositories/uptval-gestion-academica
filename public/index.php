@@ -1,16 +1,14 @@
 <?php
 
-$host = getenv('DB_HOST') ?: 'db';
-$db   = getenv('DB_DATABASE') ?: 'gestion_academica';
-$user = getenv('DB_USERNAME') ?: 'db_user';
-$pass = getenv('DB_PASSWORD') ?: 'db_password';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+echo "<h1>Probando Arquitectura MVC</h1>";
 
-try {
-    $pdo = new PDO($dsn, $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "<h1>Conexión exitosa a MySQL 9.0</h1>";
-} catch (PDOException $e) {
-    echo "<h1>Error: " . $e->getMessage() . "</h1>";
+try{
+
+    $conexion = \Core\Database::getInstance();
+    echo "<p style='color: green;'>¡Éxito! Conexión a MySQL 9.0 establecida a través del Singleton y cargada con PSR-4.</p>";
+}catch(Exception $e){
+
+    echo "<p style='color: red;'>Fallo en la prueba: " . $e->getMessage() . "</p>";
 }
