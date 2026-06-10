@@ -2,6 +2,19 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Core\Router;
+$router = new Router();
+
+$router->get('','AuthController', 'showLogin');
+$router->get('Login','AuthController', 'showLogin');
+
+$uri = $_SERVER['REQUEST_URI'];
+$method = $_SERVER['REQUEST_METHOD'];
+
+$router->resolve($uri, $method);
+
+/*
+
 echo "<h1>Probando Arquitectura MVC</h1>";
 
 try{
@@ -11,4 +24,4 @@ try{
 }catch(Exception $e){
 
     echo "<p style='color: red;'>Fallo en la prueba: " . $e->getMessage() . "</p>";
-}
+}*/
