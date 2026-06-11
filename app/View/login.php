@@ -58,8 +58,8 @@
         <form action="/login" method="POST" class="space-y-6">
             
             <div>
-                <label for="username" class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Cédula</label>
-                <input type="text" id="username" name="username" 
+                <label for="cedula" class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Cédula</label>
+                <input type="text" id="cedula" name="cedula" 
                     class="input-field w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 placeholder-gray-600" 
                     placeholder="Ingrese su usuario" required>
             </div>
