@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Models\User;
+use Core\Session;
 
 class AuthController{
 
@@ -38,7 +39,17 @@ class AuthController{
                         echo "<h3>¡Acceso Autorizado!</h3>";
                         echo "<p>Bienvenido al sistema. Tu ID de usuario es: " . $user['id_user'] . "</p>";
                         echo "</div>"; */
-                        $success_message = "¡Autenticación exitosa! Bienvenido.";
+                        
+                        //$success_message = "¡Autenticación exitosa! Bienvenido.";
+
+                        Session::start();
+                        Session::set('id_user', $user['id_user']);
+                        Session::set('cedula', $user['cedula']);
+
+                        //redirigir el flujo al dashboard.
+                        header("Location: /dashboard");
+                        exit;
+
                     }elseif($user['status'] === 'pendiente'){
                        //echo "<h3>Cuenta no verificada. Por favor, revise su correo.</h3>";
                        $error_message = "Cuenta no verificada. Por favor, revise su correo.";
