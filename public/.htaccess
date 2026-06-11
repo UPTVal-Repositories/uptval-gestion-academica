@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    # Activamos el motor de reescritura de URLs
+    RewriteEngine On
+
+    # Si la ruta solicitada NO es un archivo físico que exista (!-f)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    
+    # Y la ruta solicitada NO es un directorio físico que exista (!-d)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Entonces, redirige absolutamente todo a index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

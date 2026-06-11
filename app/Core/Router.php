@@ -55,6 +55,8 @@ class Router{
             http_response_code(404);
             echo "<h1>404 Not Found</h1>";
             echo "<p>La ruta no esta definida en el sistema</p>";
+
+            echo "<p style='color:red;'><strong>Debug:</strong> El Router recibió la URI <b>'{$uri}'</b> por el método <b>'{$method}'</b>.</p>";
         }
     }
 }
