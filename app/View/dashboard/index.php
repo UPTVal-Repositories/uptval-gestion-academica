@@ -1,3 +1,9 @@
+<?php
+/**
+ * @var string $cedula
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>

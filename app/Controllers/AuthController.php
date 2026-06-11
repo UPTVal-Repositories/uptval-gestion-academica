@@ -80,4 +80,11 @@ class AuthController{
             exit;
         }
     }
+
+    public function logout(){
+        Session::start();
+        Session::destroy();
+        header("Location: /");
+        exit;
+    }
 }
