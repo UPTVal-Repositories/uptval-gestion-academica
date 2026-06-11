@@ -76,13 +76,13 @@
             <p class="text-xs text-gray-400 mt-3 tracking-[0.2em] uppercase font-semibold">Sistema de Gestión Académica</p>
         </div>
 
-        <form action="/login" method="POST" class="space-y-6" autocomplete="off">
+        <form action="/login" method="POST" class="space-y-6">
             
             <div>
                 <label for="cedula" class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Cédula</label>
                 <input type="text" id="cedula" name="cedula" 
                     class="input-field w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 placeholder-gray-600" 
-                    placeholder="Ingrese su Cédula" required autofocus autocomplete="off">
+                    placeholder="Ingrese su Cédula" autocomplete="username" required autofocus>
             </div>
 
             <div>
@@ -90,7 +90,7 @@
                 <div class="relative">
                     <input type="password" id="password" name="password" 
                         class="input-field w-full px-4 py-3 pr-12 rounded-xl outline-none transition-all duration-300 placeholder-gray-600" 
-                        placeholder="••••••••" required autocomplete="new-password">
+                        placeholder="••••••••" required autocomplete="current-password">
                     
                     <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-uptval-orange focus:outline-none transition-colors duration-300">
                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -103,7 +103,7 @@
 
             <div class="flex items-center justify-between text-sm mt-2">
                 <label class="flex items-center text-gray-400 cursor-pointer hover:text-gray-200 transition-colors">
-                    <input type="checkbox" class="rounded border-gray-600 text-uptval-orange focus:ring-uptval-orange bg-slate-800 mr-2 w-4 h-4">
+                    <input type="checkbox" id="remember" name="remember" class="rounded border-gray-600 text-uptval-orange focus:ring-uptval-orange bg-slate-800 mr-2 w-4 h-4">
                     Recordarme
                 </label>
                 <a href="#" class="text-uptval-orange hover:text-white transition-colors duration-300">¿Olvidó su clave?</a>
@@ -145,6 +145,9 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // =========================================================
+            // LÓGICA DE MOSTRAR/OCULTAR CONTRASEÑA
+            // =========================================================
             const togglePassword = document.getElementById("togglePassword");
             const passwordInput = document.getElementById("password");
             const eyeIcon = document.getElementById("eyeIcon");
@@ -157,8 +160,36 @@
                 passwordInput.setAttribute("type", isPassword ? "text" : "password");
                 eyeIcon.innerHTML = isPassword ? pathEyeClosed : pathEyeOpen;
             });
+
+            // =========================================================
+            // LÓGICA DE RECORDAR USUARIO (CÉDULA) EN LOCALSTORAGE
+            // =========================================================
+            const cedulaInput = document.getElementById("cedula");
+            const rememberCheckbox = document.getElementById("remember");
+            const loginForm = document.querySelector("form");
+
+            const savedCedula = localStorage.getItem("uptval_cedula_recordada");
+            
+            if (savedCedula) {
+                cedulaInput.value = savedCedula;
+                if(rememberCheckbox) rememberCheckbox.checked = true;
+                
+                // Enfoca la contraseña si la cédula ya está llena
+                passwordInput.focus();
+            }
+
+            loginForm.addEventListener("submit", function() {
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem("uptval_cedula_recordada", cedulaInput.value);
+                } else {
+                    localStorage.removeItem("uptval_cedula_recordada");
+                }
+            });
         });
 
+        // =========================================================
+        // LÓGICA DE NOTIFICACIONES (TOASTS)
+        // =========================================================
         const icons = {
             success: `<svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
             error: `<svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`

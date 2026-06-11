@@ -8,6 +8,11 @@ use Core\Session;
 class AuthController{
 
     public function showLogin(){
+        if (Session::has('id_user')) {
+            header("Location: /dashboard");
+            exit;
+        }
+
         $viewPath = '/var/www/html/app/View/login.php';
 
         if(file_exists($viewPath)){
@@ -35,16 +40,20 @@ class AuthController{
 
                     if($user['status'] === 'activo'){
 
-                        /*echo "<div style='background: #198754; color: #fff; padding: 20px;'>";
-                        echo "<h3>¡Acceso Autorizado!</h3>";
-                        echo "<p>Bienvenido al sistema. Tu ID de usuario es: " . $user['id_user'] . "</p>";
-                        echo "</div>"; */
-                        
-                        //$success_message = "¡Autenticación exitosa! Bienvenido.";
 
                         Session::start();
                         Session::set('id_user', $user['id_user']);
                         Session::set('cedula', $user['cedula']);
+
+                        // Lógica de "Recordarme"
+                        if (isset($_POST['remember'])) {
+                            $token = bin2hex(random_bytes(32)); // 64 caracteres
+                            error_log("Token generado para usuario " . $user['id_user'] . ": " . $token); // DEBUG
+                            User::updateRememberToken($user['id_user'], $token);
+                            
+                            // Cookie válida por 30 días, HttpOnly y Secure (si aplica)
+                            setcookie('remember_me', $token, time() + (30 * 24 * 60 * 60), "/", "", false, true);
+                        }
 
                         //redirigir el flujo al dashboard.
                         header("Location: /dashboard");
@@ -83,6 +92,15 @@ class AuthController{
 
     public function logout(){
         Session::start();
+
+        // Limpiar Token en BD y Cookie
+        if (Session::has('id_user')) {
+            User::updateRememberToken(Session::get('id_user'), null);
+        }
+        if (isset($_COOKIE['remember_me'])) {
+            setcookie('remember_me', '', time() - 3600, "/");
+        }
+
         Session::destroy();
         header("Location: /");
         exit;
