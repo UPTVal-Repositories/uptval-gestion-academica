@@ -6,7 +6,8 @@ use Core\Router;
 $router = new Router();
 
 $router->get('','AuthController', 'showLogin');
-$router->get('Login','AuthController', 'showLogin');
+$router->get('login', 'AuthController', 'showLogin');
+$router->post('login', 'AuthController', 'login');
 
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];

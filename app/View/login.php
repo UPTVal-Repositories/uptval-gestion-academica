@@ -55,13 +55,13 @@
             <p class="text-xs text-gray-400 mt-3 tracking-[0.2em] uppercase font-semibold">Sistema de Gestión Académica</p>
         </div>
 
-        <form action="/login/authenticate" method="POST" class="space-y-6">
+        <form action="/login" method="POST" class="space-y-6">
             
             <div>
-                <label for="username" class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Usuario / Cédula</label>
+                <label for="username" class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Cédula</label>
                 <input type="text" id="username" name="username" 
                     class="input-field w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 placeholder-gray-600" 
-                    placeholder="Ingrese su identificación" required>
+                    placeholder="Ingrese su usuario" required>
             </div>
 
             <div>
