@@ -9,7 +9,7 @@ class User{
 
     public static function findByCedula($cedula){
         $db = Database::getInstance();
-        $query = "SELECT id_user, cedula, password, status FROM user WHERE cedula = :cedula LIMIT 1";
+        $query = "SELECT id_user, cedula, password, status, last_connection FROM user WHERE cedula = :cedula LIMIT 1";
         $stmt = $db->prepare($query);
 
         $stmt->bindParam(':cedula', $cedula, PDO::PARAM_STR);
@@ -38,5 +38,19 @@ class User{
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function updateLastConnection($idUser){
+        $db = Database::getInstance();
+
+        $now = date('Y-m-d H:i:s');
+
+        $query = "UPDATE user SET last_connection = :now WHERE id_user = :id_user";
+
+        $stmt = $db->prepare($query);
+
+        $stmt->bindParam(':now', $now);
+        $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }

@@ -34,6 +34,7 @@ class AuthController{
             //buscamos el usuario en la base de datos.
             $user = User::findByCedula($cedula);
 
+
             if($user){
 
                 if(password_verify($password, $user['password'])){
@@ -44,6 +45,10 @@ class AuthController{
                         Session::start();
                         Session::set('id_user', $user['id_user']);
                         Session::set('cedula', $user['cedula']);
+                        
+                        // Guardamos la fecha de su sesión anterior y actualizamos a la actual
+                        Session::set('last_connection', $user['last_connection']);
+                        User::updateLastConnection($user['id_user']);
 
                         // Lógica de "Recordarme"
                         if (isset($_POST['remember'])) {

@@ -7,6 +7,7 @@ use Core\Session;
 use Models\User;
 
 Session::start();
+date_default_timezone_set('America/Caracas');
 
 // --- INTERCEPTO DE AUTO-LOGIN (Remember Me) ---
 if (!Session::has('id_user') && isset($_COOKIE['remember_me'])) {
