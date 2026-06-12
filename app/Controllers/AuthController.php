@@ -13,7 +13,7 @@ class AuthController{
             exit;
         }
 
-        $viewPath = '/var/www/html/app/View/login.php';
+        $viewPath = '/var/www/html/app/View/auth/login.php';
 
         if(file_exists($viewPath)){
             require_once $viewPath;
@@ -80,7 +80,7 @@ class AuthController{
                 $error_message = "No existe un usuario con esta cédula.";
             }
 
-            $viewPath = '/var/www/html/app/View/login.php';
+            $viewPath = '/var/www/html/app/View/auth/login.php';
 
             if(file_exists($viewPath)){
                 require_once $viewPath;
@@ -93,6 +93,75 @@ class AuthController{
             header("Location: /");
             exit;
         }
+    }
+
+    public function showForgotPassword() {
+        $viewPath = __DIR__ . '/../View/auth/forgot-password.php';
+        require_once $viewPath;
+    }
+
+    public function sendResetLink() {
+        $cedula = $_POST['cedula'] ?? '';
+        $user = User::findByCedula($cedula);
+
+        if ($user) {
+            $token = bin2hex(random_bytes(32));
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+            
+            User::saveResetToken($cedula, $token, $expiresAt);
+            
+            // Simulación de envío de correo vía error_log por arquitectura PSR-3/Log
+            error_log("RESTABLECER CLAVE - Usuario: $cedula - Link desde el local: http://localhost/restablecer?token=$token");
+            
+            $success_message = "Si la cédula es válida, recibirá instrucciones en su correo electrónico.";
+        } else {
+            $error_message = "Si la cédula es válida, recibirá instrucciones en su correo electrónico.";
+        }
+
+        require_once __DIR__ . '/../View/auth/forgot-password.php';
+    }
+
+    public function showResetPassword() {
+        $token = $_GET['token'] ?? '';
+       
+        $user = User::findByValidResetToken($token);
+
+        if (empty($token) || !User::findByValidResetToken($token)) {
+            die('Error: El token de recuperación es inválido o ha expirado.');
+        }
+        
+
+        require_once __DIR__ . '/../View/auth/reset-password.php';
+    }
+
+    public function resetPassword() {
+        $token = $_POST['token'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
+
+        if (empty($token) || !($user = User::findByValidResetToken($token))) {
+            $error_message = "El token ha expirado durante el proceso.";
+            require_once __DIR__ . '/../View/auth/forgot-password.php';
+            return;
+        }
+
+        if ($password !== $confirm_password) {
+            $error_message = "Las contraseñas no coinciden.";
+            require_once __DIR__ . '/../View/auth/reset-password.php';
+            return;
+        }
+
+        if (strlen($password) < 8) {
+            $error_message = "La contraseña debe tener al menos 8 caracteres.";
+            require_once __DIR__ . '/../View/auth/reset-password.php';
+            return;
+        }
+
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        User::updatePasswordAndBurnToken($user['id_user'], $hashedPassword);
+
+        $success_message = "Contraseña actualizada con éxito. Ya puede iniciar sesión.";
+        require_once __DIR__ . '/../View/auth/login.php';
     }
 
     public function logout(){

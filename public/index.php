@@ -25,12 +25,14 @@ $router = new Router();
 $router->get('','AuthController', 'showLogin');
 $router->get('login', 'AuthController', 'showLogin');
 $router->post('login', 'AuthController', 'login');
-
+// Rutas de Recuperación
+$router->get('recuperar', 'AuthController', 'showForgotPassword');
+$router->post('recuperar', 'AuthController', 'sendResetLink');
+$router->get('restablecer', 'AuthController', 'showResetPassword');
+$router->post('restablecer', 'AuthController', 'resetPassword');
 
 $router->get('dashboard', 'DashboardController', 'index');
-
 $router->post('logout', 'AuthController', 'logout');
-
 
 
 $uri = $_SERVER['REQUEST_URI'];

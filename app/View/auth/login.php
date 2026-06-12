@@ -106,7 +106,7 @@
                     <input type="checkbox" id="remember" name="remember" class="rounded border-gray-600 text-uptval-orange focus:ring-uptval-orange bg-slate-800 mr-2 w-4 h-4">
                     Recordarme
                 </label>
-                <a href="#" class="text-uptval-orange hover:text-white transition-colors duration-300">¿Olvidó su clave?</a>
+                <a href="/recuperar" class="text-uptval-orange hover:text-white transition-colors duration-300">¿Olvidó su clave?</a>
             </div>
 
             <button type="submit" 
