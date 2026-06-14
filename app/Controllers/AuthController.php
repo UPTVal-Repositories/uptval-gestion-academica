@@ -110,8 +110,66 @@ class AuthController{
             
             User::saveResetToken($cedula, $token, $expiresAt);
             
+             $resetLink = "http://localhost/restablecer?token=$token";
+
             // Simulación de envío de correo vía error_log por arquitectura PSR-3/Log
-            error_log("RESTABLECER CLAVE - Usuario: $cedula - Link desde el local: http://localhost/restablecer?token=$token");
+            error_log("RESTABLECER CLAVE - Usuario: $cedula - Link desde el local: $resetLink");
+
+
+            // =========================================================
+            // NUEVO: INTEGRACIÓN REAL DE CORREO (PHPMailer + AWS SES)
+            // =========================================================
+            try {
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                
+                // Configuración del servidor SMTP (Lee de tu archivo .env)
+                $mail->isSMTP();
+                $mail->Host       = $_ENV['SMTP_HOST'];
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $_ENV['SMTP_USER'];
+                $mail->Password   = $_ENV['SMTP_PASS'];
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = $_ENV['SMTP_PORT'];
+
+
+                // Remitente y Destinatario
+                $mail->setFrom($_ENV['SMTP_FROM_EMAIL'], $_ENV['SMTP_FROM_NAME']);
+                
+                $correoDestino = $user['recovery_email'] ?? null; 
+                
+                if ($correoDestino) {
+                    $mail->addAddress($correoDestino);
+
+                    // Contenido del correo (Diseño HTML UPTVal)
+                    $mail->isHTML(true);
+                    $mail->CharSet = 'UTF-8';
+                    $mail->Subject = 'Recuperación de Contraseña - Gestión Académica UPTVal';
+                    $mail->Body    = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;'>
+                            <div style='background-color: #0f172a; padding: 20px; text-align: center;'>
+                                <h2 style='color: white; margin: 0;'><span style='color: #d97b29;'>UPT</span>Val</h2>
+                            </div>
+                            <div style='padding: 30px; background-color: #ffffff; color: #333333;'>
+                                <p>Hola,</p>
+                                <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta asociada a la cédula <strong>{$cedula}</strong>.</p>
+                                <p>Haga clic en el siguiente botón para crear una nueva contraseña. Por seguridad, este enlace expirará en 15 minutos:</p>
+                                <div style='text-align: center; margin: 30px 0;'>
+                                    <a href='{$resetLink}' style='background-color: #d97b29; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Restablecer Contraseña</a>
+                                </div>
+                                <p style='font-size: 12px; color: #999; text-align: center;'>Si usted no solicitó este cambio, ignore este correo de forma segura.</p>
+                            </div>
+                        </div>";
+
+                    $mail->send();
+                } else {
+                    error_log("Error AWS SES: El usuario $cedula no tiene un correo registrado en la base de datos.");
+                }
+            } catch (\Exception $e) {
+                // Capturamos el error silenciosamente en el log
+                error_log("Fallo al enviar correo con AWS SES: " . $mail->ErrorInfo);
+            }
+            // =========================================================
+
             
             $success_message = "Si la cédula es válida, recibirá instrucciones en su correo electrónico.";
         } else {

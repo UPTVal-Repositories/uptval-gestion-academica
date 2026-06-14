@@ -9,9 +9,8 @@ class User{
 
     public static function findByCedula($cedula){
         $db = Database::getInstance();
-        $query = "SELECT id_user, cedula, password, status, last_connection FROM user WHERE cedula = :cedula LIMIT 1";
+        $query = "SELECT id_user, cedula, password, status, last_connection, recovery_email FROM user WHERE cedula = :cedula LIMIT 1";
         $stmt = $db->prepare($query);
-
         $stmt->bindParam(':cedula', $cedula, PDO::PARAM_STR);
         $stmt->execute();
 
@@ -87,10 +86,12 @@ class User{
 
     public static function updatePasswordAndBurnToken($idUser, $hashedPassword) {
         $db = Database::getInstance();
-        $query = "UPDATE user SET password = :password, reset_token = NULL, reset_token_expires_at = NULL WHERE id_user = :id_user";
+        $query = "UPDATE user SET password = :password, reset_token = NULL, reset_token_expires_at = NULL, status = 'activo'  WHERE id_user = :id_user";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
         return $stmt->execute();
     }
+
+    
 }
