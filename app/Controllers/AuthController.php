@@ -110,7 +110,9 @@ class AuthController{
             
             User::saveResetToken($cedula, $token, $expiresAt);
             
-             $resetLink = "http://localhost/restablecer?token=$token";
+            // $resetLink = "http://localhost/restablecer?token=$token";
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+            $resetLink = $protocol . "://" . $_SERVER['HTTP_HOST'] . "/restablecer?token=" . $token;
 
             // Simulación de envío de correo vía error_log por arquitectura PSR-3/Log
             error_log("RESTABLECER CLAVE - Usuario: $cedula - Link desde el local: $resetLink");
