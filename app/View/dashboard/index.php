@@ -1,6 +1,7 @@
 <?php
 /**
  * @var string $cedula
+ * @var string $last_connection
  */
 ?>
 
@@ -85,6 +86,9 @@
             <div class="text-right hidden sm:block">
                 <p class="text-sm font-medium text-gray-300">Usuario Activo</p>
                 <p class="text-xs text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula); ?></p>
+                <?php if (!empty($last_connection)): ?>
+                    <p class="text-[11px] text-gray-500 mt-1">Última conexión: <?php echo htmlspecialchars($last_connection); ?></p>
+                <?php endif; ?>
             </div>
             
             <form action="/logout" method="POST" class="m-0">
@@ -191,6 +195,7 @@
                     <div class="flex-1">
                         <p class="text-xs text-gray-400">Usuario Activo</p>
                         <p class="text-sm text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula); ?></p>
+                        <p class="text-[11px] text-gray-500 mt-1">Última conexión: <?php echo htmlspecialchars($last_connection); ?></p>
                     </div>
                 </div>
             </div>

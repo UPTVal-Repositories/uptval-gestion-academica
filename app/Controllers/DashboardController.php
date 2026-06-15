@@ -19,15 +19,12 @@ class DashboardController {
         $idUser = Session::get('id_user');
         $cedula = Session::get('cedula');
 
-       /* // 3. Renderizamos una vista temporal para confirmar que funcionó
-        // (Más adelante aquí haremos el require_once de tu vista HTML real del dashboard)
-        echo "<div style='background-color: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;'>";
-        echo "<h1 style='color: #d97b29;'>UPTVal - Dashboard</h1>";
-        echo "<h2>¡Autenticación y Sesión Exitosas!</h2>";
-        echo "<p>Cédula del usuario activo: <strong>{$cedula}</strong></p>";
-        echo "<p>ID interno: <strong>{$idUser}</strong></p>";
-        echo "<a href='/logout' style='color: #808285; margin-top: 20px;'>Cerrar Sesión (Próximamente)</a>";
-        echo "</div>";*/
+        $last_connection_raw = Session::get('last_connection');
+        $last_connection = '';
+
+        if (!empty($last_connection_raw)) {
+            $last_connection = date('d/m/Y - h:i a', strtotime($last_connection_raw));
+        }
 
         $viewPath = __DIR__ . '/../View/dashboard/index.php';
         
