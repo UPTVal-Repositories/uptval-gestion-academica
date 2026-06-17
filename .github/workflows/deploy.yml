@@ -73,18 +73,14 @@ jobs:
             if [ -f "$HOME_DIR/.env.backup" ]; then
               cp $HOME_DIR/.env.backup .env
               echo ">>> .env restaurado desde backup"
-            elif [ -f ".env.example" ]; then
-              cp .env.example .env
-              echo ">>> .env creado desde .env.example (revisa las variables)"
             else
-              echo ">>> ERROR: No hay .env.backup ni .env.example. Crea un .env manualmente."
-              exit 1
+              echo ">>> ⚠️  No se encontró .env.backup. Asegúrate de crear el archivo .env manualmente."
             fi
 
             # ═══════════════════════════════════════════
-            # FASE 4 — Crear directorios requeridos (no trackeados en git) y permisos
+            # FASE 4 — Crear directorios requeridos y permisos
             # ═══════════════════════════════════════════
-            echo ">>> Creando directorios requeridos por Laravel..."
+            echo ">>> Creando directorios requeridos..."
             mkdir -p storage/framework/{cache/data,sessions,views}
             mkdir -p storage/logs
             mkdir -p bootstrap/cache
@@ -92,29 +88,27 @@ jobs:
             chmod -R 775 storage bootstrap/cache
 
             # ═══════════════════════════════════════════
-            # FASE 5 — Build y arranque de contenedores
+            # FASE 5 — Instalar dependencias con Composer
+            # ═══════════════════════════════════════════
+            echo ">>> Instalando dependencias de Composer..."
+            sudo docker run --rm -w /var/www/html -v "$(pwd):/var/www/html" php:8.2-cli sh -c "\
+              php -r 'copy(\"https://getcomposer.org/installer\", \"composer-setup.php\");' && \
+              php composer-setup.php && \
+              php -r 'unlink(\"composer-setup.php\");' && \
+              php composer.phar install --no-dev --optimize-autoloader && \
+              rm composer.phar \
+            " || { echo ">>> ⚠️  Composer falló, revisa los errores arriba"; exit 1; }
+
+            # ═══════════════════════════════════════════
+            # FASE 6 — Build y arranque de contenedores
             # ═══════════════════════════════════════════
             echo ">>> Construyendo y levantando contenedores..."
             $DC up -d --build --force-recreate
 
             # ═══════════════════════════════════════════
-            # FASE 6 — Post-deploy (dentro del contenedor)
+            # FASE 7 — Post-deploy (dentro del contenedor)
             # ═══════════════════════════════════════════
             echo ">>> Arreglando ownership para www-data..."
             $DC exec -T web chown -R www-data:www-data storage bootstrap/cache
-
-            echo ">>> Ejecutando migraciones (con reintento hasta que MySQL esté listo)..."
-            for i in $(seq 1 15); do
-              if $DC exec -T web php artisan migrate --force 2>/dev/null; then
-                break
-              fi
-              echo "   Esperando a MySQL... intento $i/15"
-              sleep 2
-            done
-
-            echo ">>> Optimizando cachés..."
-            $DC exec -T web php artisan config:cache
-            $DC exec -T web php artisan route:cache || echo "   ⚠️ route:cache falló (posiblemente por closures en rutas)"
-            $DC exec -T web php artisan view:cache
 
             echo ">>> ✅ Deploy completado exitosamente"
