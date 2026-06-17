@@ -92,10 +92,11 @@ jobs:
             # ═══════════════════════════════════════════
             echo ">>> Instalando dependencias de Composer..."
             sudo docker run --rm -w /var/www/html -v "$(pwd):/var/www/html" php:8.2-cli sh -c "\
+              apt-get update -qq && apt-get install -y -qq unzip && \
               php -r 'copy(\"https://getcomposer.org/installer\", \"composer-setup.php\");' && \
               php composer-setup.php && \
               php -r 'unlink(\"composer-setup.php\");' && \
-              php composer.phar install --no-dev --optimize-autoloader && \
+              php composer.phar install --no-dev --optimize-autoloader --no-interaction && \
               rm composer.phar \
             " || { echo ">>> ⚠️  Composer falló, revisa los errores arriba"; exit 1; }
 
