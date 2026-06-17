@@ -126,16 +126,16 @@ class AuthController{
                 
                 // Configuración del servidor SMTP (Lee de tu archivo .env)
                 $mail->isSMTP();
-                $mail->Host       = $_ENV['SMTP_HOST'];
+                $mail->Host       = getenv('MAIL_HOST');
                 $mail->SMTPAuth   = true;
-                $mail->Username   = $_ENV['SMTP_USER'];
-                $mail->Password   = $_ENV['SMTP_PASS'];
+                $mail->Username   = getenv('MAIL_USERNAME');
+                $mail->Password   = getenv('MAIL_PASSWORD');
                 $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = $_ENV['SMTP_PORT'];
+                $mail->Port       = getenv('MAIL_PORT');
 
 
                 // Remitente y Destinatario
-                $mail->setFrom($_ENV['SMTP_FROM_EMAIL'], $_ENV['SMTP_FROM_NAME']);
+                $mail->setFrom(getenv('MAIL_FROM_ADDRESS'), getenv('MAIL_FROM_NAME'));
                 
                 $correoDestino = $user['recovery_email'] ?? null; 
                 
