@@ -21,35 +21,97 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            PROJECT_DIR="web-app"
-            cd /home/ec2-user
-            
-            # 1. Si el proyecto existe, respaldar el .env y apagar la infraestructura
-            if [ -d "$PROJECT_DIR" ]; then
-              # Respaldo de seguridad del .env en la raíz del servidor
-              if [ -f "$PROJECT_DIR/.env" ]; then
-                cp $PROJECT_DIR/.env /home/ec2-user/.env.backup
-              fi
-              
-              cd $PROJECT_DIR
-              # Apagamos SIN el -v para NO borrar la base de datos MySQL 9.0
-              docker-compose down --remove-orphans
-              cd ..
-              rm -rf $PROJECT_DIR
-            fi
-            
-            # 2. Clonar el repositorio limpio usando el token nativo de GitHub Actions
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $PROJECT_DIR
-            
-            cd $PROJECT_DIR
-            
-            # 3. Restaurar el archivo .env desde el respaldo
-            if [ -f "/home/ec2-user/.env.backup" ]; then
-              cp /home/ec2-user/.env.backup .env
+            set -e
+
+            # Detectar docker compose v2 o docker-compose v1
+            if docker compose version > /dev/null 2>&1; then
+              DC="docker compose"
             else
-              # Si es la primera vez, copiamos el de ejemplo para que no falle (luego deberás editarlo manual)
-              cp .env.example .env
+              DC="docker-compose"
             fi
-            
-            # 4. Levantar la nueva versión
-            docker-compose up -d --build --force-recreate
+
+            PROJECT_DIR="web-app"
+            HOME_DIR="/home/ec2-user"
+            REPO="${{ github.repository }}"
+            TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+            cd $HOME_DIR
+
+            # ═══════════════════════════════════════════
+            # FASE 1 — Respaldar .env y limpiar proyecto anterior
+            # ═══════════════════════════════════════════
+            if [ -d "$PROJECT_DIR" ]; then
+              echo ">>> Respaldando .env existente..."
+              if [ -f "$PROJECT_DIR/.env" ]; then
+                cp $PROJECT_DIR/.env $HOME_DIR/.env.backup
+              fi
+
+              echo ">>> Deteniendo contenedores anteriores..."
+              if [ -f "$PROJECT_DIR/docker-compose.yml" ] || [ -f "$PROJECT_DIR/docker-compose.yaml" ]; then
+                cd $PROJECT_DIR
+                $DC down --remove-orphans || true
+                cd $HOME_DIR
+              fi
+
+              echo ">>> Eliminando proyecto anterior (sudo por archivos root)..."
+              sudo rm -rf $PROJECT_DIR
+            fi
+
+            # ═══════════════════════════════════════════
+            # FASE 2 — Clonar repositorio
+            # ═══════════════════════════════════════════
+            echo ">>> Clonando repositorio..."
+            git clone https://x-access-token:$TOKEN@github.com/$REPO.git $PROJECT_DIR
+            cd $PROJECT_DIR
+
+            # ═══════════════════════════════════════════
+            # FASE 3 — Restaurar .env
+            # ═══════════════════════════════════════════
+            if [ -f "$HOME_DIR/.env.backup" ]; then
+              cp $HOME_DIR/.env.backup .env
+              echo ">>> .env restaurado desde backup"
+            elif [ -f ".env.example" ]; then
+              cp .env.example .env
+              echo ">>> .env creado desde .env.example (revisa las variables)"
+            else
+              echo ">>> ERROR: No hay .env.backup ni .env.example. Crea un .env manualmente."
+              exit 1
+            fi
+
+            # ═══════════════════════════════════════════
+            # FASE 4 — Crear directorios requeridos (no trackeados en git) y permisos
+            # ═══════════════════════════════════════════
+            echo ">>> Creando directorios requeridos por Laravel..."
+            mkdir -p storage/framework/{cache/data,sessions,views}
+            mkdir -p storage/logs
+            mkdir -p bootstrap/cache
+            echo ">>> Ajustando permisos en storage/ y bootstrap/cache/..."
+            chmod -R 775 storage bootstrap/cache
+
+            # ═══════════════════════════════════════════
+            # FASE 5 — Build y arranque de contenedores
+            # ═══════════════════════════════════════════
+            echo ">>> Construyendo y levantando contenedores..."
+            $DC up -d --build --force-recreate
+
+            # ═══════════════════════════════════════════
+            # FASE 6 — Post-deploy (dentro del contenedor)
+            # ═══════════════════════════════════════════
+            echo ">>> Arreglando ownership para www-data..."
+            $DC exec -T web chown -R www-data:www-data storage bootstrap/cache
+
+            echo ">>> Ejecutando migraciones (con reintento hasta que MySQL esté listo)..."
+            for i in $(seq 1 15); do
+              if $DC exec -T web php artisan migrate --force 2>/dev/null; then
+                break
+              fi
+              echo "   Esperando a MySQL... intento $i/15"
+              sleep 2
+            done
+
+            echo ">>> Optimizando cachés..."
+            $DC exec -T web php artisan config:cache
+            $DC exec -T web php artisan route:cache || echo "   ⚠️ route:cache falló (posiblemente por closures en rutas)"
+            $DC exec -T web php artisan view:cache
+
+            echo ">>> ✅ Deploy completado exitosamente"
