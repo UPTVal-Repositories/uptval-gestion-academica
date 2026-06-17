@@ -23,11 +23,14 @@ jobs:
           script: |
             set -e
 
+            # Asegurar que ec2-user tenga permisos sobre Docker (one-time fix)
+            sudo usermod -aG docker ec2-user || true
+
             # Detectar docker compose v2 o docker-compose v1
-            if docker compose version > /dev/null 2>&1; then
-              DC="docker compose"
+            if sudo docker compose version > /dev/null 2>&1; then
+              DC="sudo docker compose"
             else
-              DC="docker-compose"
+              DC="sudo docker-compose"
             fi
 
             PROJECT_DIR="web-app"
