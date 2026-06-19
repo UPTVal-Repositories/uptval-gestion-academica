@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Core\Session;
+use Models\Staff;
 
 class StaffController{
 
@@ -20,6 +21,16 @@ class StaffController{
 
         if (!empty($last_connection_raw)) {
             $last_connection = date('d/m/Y - h:i a', strtotime($last_connection_raw));
+        }
+        
+        $staffList = Staff::all();
+       /* echo "<pre style='background: #111; color: #0f0; padding: 20px; z-index: 9999; position: relative;'>";
+print_r($staffList);
+echo "</pre>";
+die();*/
+
+        if(!empty($staffList) && isset($staffList['id_staff'])){
+            $staffList = [$staffList];
         }
 
         require_once __DIR__ . '/../View/staff/index.php';

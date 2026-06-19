@@ -186,8 +186,8 @@
             
             <header class="bg-white px-6 sm:px-8 py-5 shadow-sm border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Gestión de Personal</h2>
-                    <p class="text-sm text-gray-500 mt-1">Administra los docentes y empleados de la institución.</p>
+                    <h2 class="text-2xl font-bold text-gray-800">Gestión de Docentes</h2>
+                    <p class="text-sm text-gray-500 mt-1">Administra los docentes de la institución.</p>
                 </div>
                 
                 <button onclick="toggleModal('modalRegistrar')" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
@@ -223,13 +223,88 @@
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider border-b border-gray-200">
                                 <th class="py-4 px-6 font-semibold">Cédula</th>
-                                <th class="py-4 px-6 font-semibold">Nombre Completo</th>
+                                <th class="py-4 px-6 font-semibold">Nombre del Docente</th>
                                 <th class="py-4 px-6 font-semibold">Tipo</th>
                                 <th class="py-4 px-6 font-semibold">Departamento</th>
                                 <th class="py-4 px-6 font-semibold text-center">Estado</th>
                                 <th class="py-4 px-6 font-semibold text-center">Acciones</th>
                             </tr>
                         </thead>
+
+                        <tbody class="divide-y divide-gray-100 text-sm">
+    
+    <?php if (empty($staffList)): ?>
+        <tr>
+            <td colspan="6" class="py-10 text-center text-gray-500 bg-gray-50 rounded-b-xl">
+                <i class="ph ph-user-circle-minus text-5xl mb-3 block opacity-50"></i>
+                No hay personal registrado en la base de datos. <br>
+                Usa el botón "Registrar Personal" para comenzar.
+            </td>
+        </tr>
+    <?php else: ?>
+        <?php foreach ($staffList as $person): ?>
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-4 px-6 font-medium text-gray-700">
+                    <?php echo htmlspecialchars($person['cedula']); ?>
+                </td>
+                
+                <td class="py-4 px-6">
+                    <div class="font-medium text-gray-800">
+                        <?php echo htmlspecialchars($person['last_name'] . ', ' . $person['first_name']); ?>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <?php echo htmlspecialchars($person['email']); ?>
+                    </div>
+                </td>
+                
+                <td class="py-4 px-6">
+                    <?php 
+                        $badgeColor = ($person['type_staff'] === 'Regular') ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+                    ?>
+                    <span class="<?php echo $badgeColor; ?> px-3 py-1 rounded-full text-xs font-medium">
+                        <?php echo htmlspecialchars($person['type_staff']); ?>
+                    </span>
+                </td>
+                
+                <td class="py-4 px-6 text-gray-600">
+                    <?php echo htmlspecialchars($person['name'] ?? 'Sin Asignar'); ?>
+                </td>
+                
+                <td class="py-4 px-6 text-center">
+                    <?php if ($person['status'] === 'activo'): ?>
+                        <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                            <div class="w-1.5 h-1.5 rounded-full bg-green-600"></div> Activo
+                        </span>
+                    <?php else: ?>
+                        <span class="inline-flex items-center gap-1.5 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
+                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div> Inactivo
+                        </span>
+                    <?php endif; ?>
+                </td>
+                
+                <td class="py-4 px-6">
+                    <div class="flex items-center justify-center gap-3">
+                        <button class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
+                            <i class="ph ph-pencil-simple text-xl"></i>
+                        </button>
+                        
+                        <?php if ($person['status'] === 'activo'): ?>
+                            <button class="text-gray-400 hover:text-red-600 transition-colors" title="Inactivar">
+                                <i class="ph ph-user-minus text-xl"></i>
+                            </button>
+                        <?php else: ?>
+                            <button class="text-gray-400 hover:text-green-600 transition-colors" title="Reactivar">
+                                <i class="ph ph-check-circle text-xl"></i>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+</tbody>
+                       <!--
                         <tbody class="divide-y divide-gray-100 text-sm">
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="py-4 px-6 font-medium text-gray-700">V-12345678</td>
@@ -252,6 +327,7 @@
                                 </td>
                             </tr>
                         </tbody>
+                        -->
                     </table>
                 </div>
             </div>
