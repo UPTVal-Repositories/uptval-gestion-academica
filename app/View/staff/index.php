@@ -207,13 +207,13 @@
                     <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                         <select class="px-4 py-2 border border-gray-300 rounded-lg outline-none text-gray-600 bg-white w-full sm:w-auto">
                             <option value="">Todos los Departamentos</option>
-                            <option value="1">Ingeniería en Informática</option>
-                            <option value="2">Administración</option>
+                            <option value="1">Informática</option>
+                            <option value="2">Electricidad</option>
                         </select>
                         <select class="px-4 py-2 border border-gray-300 rounded-lg outline-none text-gray-600 bg-white w-full sm:w-auto">
                             <option value="">Todos los Tipos</option>
-                            <option value="Docente">Docente</option>
-                            <option value="Administrativo">Administrativo</option>
+                            <option value="Docente">Contratado</option>
+                            <option value="Administrativo">Regular</option>
                         </select>
                     </div>
                 </div>
@@ -233,102 +233,95 @@
 
                         <tbody class="divide-y divide-gray-100 text-sm">
     
-    <?php if (empty($staffList)): ?>
-        <tr>
-            <td colspan="6" class="py-10 text-center text-gray-500 bg-gray-50 rounded-b-xl">
-                <i class="ph ph-user-circle-minus text-5xl mb-3 block opacity-50"></i>
-                No hay personal registrado en la base de datos. <br>
-                Usa el botón "Registrar Personal" para comenzar.
-            </td>
-        </tr>
-    <?php else: ?>
-        <?php foreach ($staffList as $person): ?>
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="py-4 px-6 font-medium text-gray-700">
-                    <?php echo htmlspecialchars($person['cedula']); ?>
-                </td>
-                
-                <td class="py-4 px-6">
-                    <div class="font-medium text-gray-800">
-                        <?php echo htmlspecialchars($person['last_name'] . ', ' . $person['first_name']); ?>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        <?php echo htmlspecialchars($person['email']); ?>
-                    </div>
-                </td>
-                
-                <td class="py-4 px-6">
-                    <?php 
-                        $badgeColor = ($person['type_staff'] === 'Regular') ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
-                    ?>
-                    <span class="<?php echo $badgeColor; ?> px-3 py-1 rounded-full text-xs font-medium">
-                        <?php echo htmlspecialchars($person['type_staff']); ?>
-                    </span>
-                </td>
-                
-                <td class="py-4 px-6 text-gray-600">
-                    <?php echo htmlspecialchars($person['name'] ?? 'Sin Asignar'); ?>
-                </td>
-                
-                <td class="py-4 px-6 text-center">
-                    <?php if ($person['status'] === 'activo'): ?>
-                        <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                            <div class="w-1.5 h-1.5 rounded-full bg-green-600"></div> Activo
-                        </span>
-                    <?php else: ?>
-                        <span class="inline-flex items-center gap-1.5 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div> Inactivo
-                        </span>
-                    <?php endif; ?>
-                </td>
-                
-                <td class="py-4 px-6">
-                    <div class="flex items-center justify-center gap-3">
-                        <button class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
-                            <i class="ph ph-pencil-simple text-xl"></i>
-                        </button>
-                        
-                        <?php if ($person['status'] === 'activo'): ?>
-                            <button class="text-gray-400 hover:text-red-600 transition-colors" title="Inactivar">
-                                <i class="ph ph-user-minus text-xl"></i>
-                            </button>
-                        <?php else: ?>
-                            <button class="text-gray-400 hover:text-green-600 transition-colors" title="Reactivar">
-                                <i class="ph ph-check-circle text-xl"></i>
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    <?php endif; ?>
+                            <?php if (empty($staffList)): ?>
+                                <tr>
+                                    <td colspan="6" class="py-10 text-center text-gray-500 bg-gray-50 rounded-b-xl">
+                                        <i class="ph ph-user-circle-minus text-5xl mb-3 block opacity-50"></i>
+                                        No hay personal registrado en la base de datos. <br>
+                                        Usa el botón "Registrar Personal" para comenzar.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($staffList as $person): ?>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="py-4 px-6 font-medium text-gray-700">
+                                            <?php echo htmlspecialchars($person['cedula']); ?>
+                                        </td>
+                                        
+                                        <td class="py-4 px-6">
+                                            <div class="font-medium text-gray-800">
+                                                <?php echo htmlspecialchars($person['last_name'] . ', ' . $person['first_name']); ?>
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                <?php echo htmlspecialchars($person['email']); ?>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="py-4 px-6">
+                                            <?php 
+                                                $badgeColor = ($person['type_staff'] === 'Regular') ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+                                            ?>
+                                            <span class="<?php echo $badgeColor; ?> px-3 py-1 rounded-full text-xs font-medium">
+                                                <?php echo htmlspecialchars($person['type_staff']); ?>
+                                            </span>
+                                        </td>
+                                        
+                                        <td class="py-4 px-6 text-gray-600">
+                                            <?php echo htmlspecialchars($person['name'] ?? 'Sin Asignar'); ?>
+                                        </td>
+                                        
+                                        <td class="py-4 px-6 text-center">
+                                            <?php if ($person['status'] === 'activo'): ?>
+                                                <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                                                    <div class="w-1.5 h-1.5 rounded-full bg-green-600"></div> Activo
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="inline-flex items-center gap-1.5 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
+                                                    <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div> Inactivo
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        
+                                        <td class="py-4 px-6">
+                                            <div class="flex items-center justify-center gap-3">
+                                                <button class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
+                                                    <i class="ph ph-pencil-simple text-xl"></i>
+                                                </button>
+                                                
+                                                <?php if ($person['status'] === 'activo'): ?>
+                                                    <button class="text-gray-400 hover:text-red-600 transition-colors" title="Inactivar">
+                                                        <i class="ph ph-user-minus text-xl"></i>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <button class="text-gray-400 hover:text-green-600 transition-colors" title="Reactivar">
+                                                        <i class="ph ph-check-circle text-xl"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
 
-</tbody>
-                       <!--
-                        <tbody class="divide-y divide-gray-100 text-sm">
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="py-4 px-6 font-medium text-gray-700">V-12345678</td>
-                                <td class="py-4 px-6">
-                                    <div class="font-medium text-gray-800">Ana María Rivas</div>
-                                    <div class="text-xs text-gray-500">ana.rivas@uptval.edu.ve</div>
-                                </td>
-                                <td class="py-4 px-6"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">Docente</span></td>
-                                <td class="py-4 px-6 text-gray-600">Ing. en Informática</td>
-                                <td class="py-4 px-6 text-center">
-                                    <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-green-600"></div> Activo
-                                    </span>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <button class="text-gray-400 hover:text-blue-600 transition-colors"><i class="ph ph-pencil-simple text-xl"></i></button>
-                                        <button class="text-gray-400 hover:text-red-600 transition-colors"><i class="ph ph-user-minus text-xl"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
                         </tbody>
-                        -->
+
                     </table>
+                    
+                  <div class="bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-center rounded-b-xl">
+                        <div class="flex items-center bg-gray-100 rounded-full p-1 shadow-inner">
+                            <button class="px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 cursor-not-allowed disabled:opacity-50" disabled>
+                                Anterior
+                            </button>
+                            <div class="px-4 text-sm text-gray-500 font-medium border-x border-gray-300 mx-1">
+                                Página 1 de 5
+                            </div>
+                            <button class="px-4 py-1.5 rounded-full text-sm font-medium text-gray-700 bg-white shadow-sm hover:text-uptval-dark transition-all">
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>  
+
+
                 </div>
             </div>
         </main>
@@ -375,6 +368,7 @@
             </div>
         </div>
     </div>
+    
 
     <script>
         // Lógica del Menú Móvil
