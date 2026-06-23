@@ -34,4 +34,46 @@ class Staff{
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // 1. Método para contar el total de registros
+    public static function countAll() {
+
+        $db = Database::getInstance();
+        $query = "SELECT 
+                    COUNT(s.id_staff) as total 
+                  FROM 
+                    staff s";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC)['total'];
+    }
+
+    public static function paginate($limit, $offset) {
+        $db = Database::getInstance();
+        
+        $sql = "SELECT 
+	                u.cedula,
+	                s.first_name,
+	                s.last_name,
+	                s.email,
+	                s.type_staff,
+	                d.name,
+	                s.status,
+	                s.sex,
+	                s.phone,
+	                s.id_staff 
+                FROM 
+	                staff s 
+                INNER JOIN `user` u on s.id_user = u.id_user
+                INNER JOIN department d on s.id_department = d.id_department 
+                LIMIT :limit OFFSET :offset;"; 
+                
+        $stmt = $db->prepare($sql);
+        // Usamos bindValue asegurando que sean enteros, PDO requiere esto para LIMIT
+        $stmt->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

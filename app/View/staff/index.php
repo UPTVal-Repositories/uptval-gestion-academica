@@ -2,6 +2,8 @@
 /**
  * @var string $cedula
  * @var string $last_connection
+ * @var string $page
+ * @var string $totalPages
  */
 ?>
 
@@ -307,19 +309,43 @@
 
                     </table>
                     
-                  <div class="bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-center rounded-b-xl">
-                        <div class="flex items-center bg-gray-100 rounded-full p-1 shadow-inner">
-                            <button class="px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 cursor-not-allowed disabled:opacity-50" disabled>
-                                Anterior
-                            </button>
-                            <div class="px-4 text-sm text-gray-500 font-medium border-x border-gray-300 mx-1">
-                                Página 1 de 5
+
+                    <div class="flex items-center justify-center border-t border-gray-200 bg-white px-4 py-4 sm:px-6 w-full">
+    
+                                <div class="flex items-center gap-6"> <?php if ($page > 1): ?>
+                                        <a href="/personal?page=<?= $page - 1 ?>" 
+                                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
+                                            Anterior
+                                        </a>
+                                    <?php else: ?>
+                                        <button disabled 
+                                                class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed shadow-sm">
+                                            Anterior
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Página <span class="font-medium"><?= $page ?></span> de 
+                                            <span class="font-medium"><?= $totalPages > 0 ? $totalPages : 1 ?></span>
+                                        </p>
+                                    </div>
+
+                                    <?php if ($page < $totalPages): ?>
+                                        <a href="/personal?page=<?= $page + 1 ?>" 
+                                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
+                                            Siguiente
+                                        </a>
+                                    <?php else: ?>
+                                        <button disabled 
+                                                class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed shadow-sm">
+                                            Siguiente
+                                        </button>
+                                    <?php endif; ?>
+
+                                </div>
+                                
                             </div>
-                            <button class="px-4 py-1.5 rounded-full text-sm font-medium text-gray-700 bg-white shadow-sm hover:text-uptval-dark transition-all">
-                                Siguiente
-                            </button>
-                        </div>
-                    </div>  
 
 
                 </div>
