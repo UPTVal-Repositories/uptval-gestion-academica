@@ -2,6 +2,9 @@
 /**
  * @var string $cedula
  * @var string $last_connection
+ * @var string $total_staff
+ * @var string $activos_staff
+ * @var string $inactivos_staff
  */
 ?>
 
@@ -115,22 +118,18 @@
                     <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
-
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
@@ -221,7 +220,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-slate-500 font-medium">Total Personal</p>
-                            <h3 class="text-3xl font-bold text-slate-900 mt-1">84</h3>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1"><?= $total_staff ?? 0 ?></h3>
                         </div>
                         <div class="p-3 bg-orange-100 text-orange-600 rounded-xl">
                             <i class="ph ph-users text-2xl"></i>
@@ -299,23 +298,31 @@
                             
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
-                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#fee2e2" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="90 10" stroke-linecap="round"></circle>
+                                    
+                                    <?php 
+                                        // Cálculo de porcentajes para el dibujo SVG (evita división por cero)
+                                        $porcentaje_activos = ($total_staff > 0) ? round(($activos_staff / $total_staff) * 100) : 0;
+                                        $porcentaje_inactivos = 100 - $porcentaje_activos;
+                                    ?>
+                                    
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#fee2e2" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="<?= $porcentaje_activos ?> <?= $porcentaje_inactivos ?>" stroke-linecap="round"></circle>
                                     </svg>
+                                    
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span class="text-2xl font-bold text-slate-800">84</span>
+                                        <span class="text-2xl font-bold text-slate-800"><?= $total_staff ?></span>
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-4 w-full xl:w-auto">
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-orange-500"></div><span class="text-sm font-medium text-slate-600">Activos</span></div>
-                                        <span class="text-base font-bold text-slate-900">76</span>
+                                        <span class="text-base font-bold text-slate-900"><?= $activos_staff ?></span>
                                     </div>
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-200"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
-                                        <span class="text-base font-bold text-slate-900">8</span>
+                                        <span class="text-base font-bold text-slate-900"><?= $inactivos_staff ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -339,9 +346,9 @@
                             
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
-                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
                                     </svg>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                                         <span class="text-2xl font-bold text-slate-800">1,248</span>
@@ -379,9 +386,9 @@
                             
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
-                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#dcfce7" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#22c55e" stroke-width="5" stroke-dasharray="92 8" stroke-linecap="round"></circle>
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#dcfce7" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#22c55e" stroke-width="5" stroke-dasharray="92 8" stroke-linecap="round"></circle>
                                     </svg>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                                         <span class="text-2xl font-bold text-slate-800">92%</span>
@@ -414,7 +421,7 @@
     </div>
 
     <script>
-        // Lógica existente del menú móvil
+        // Lógica de Sidebar Móvil
         const menuToggle = document.getElementById('menuToggle');
         const mobileSidebar = document.getElementById('mobileSidebar');
         const closeMenu = document.getElementById('closeMenu');
@@ -443,13 +450,13 @@
             }
         });
 
-        // NUEVA LÓGICA: Carrusel de Estadísticas
+        // Lógica del Carrusel de Estadísticas
         const carousel = document.getElementById('chartCarousel');
         const btnNext = document.getElementById('btnNext');
         const btnPrev = document.getElementById('btnPrev');
 
         if(carousel && btnNext && btnPrev) {
-            // Calcula cuánto desplazar: el ancho de una tarjeta + el espacio "gap-6" (24px)
+            // Desplazamiento dinámico según el tamaño de la pantalla
             const scrollAmount = () => carousel.offsetWidth / (window.innerWidth >= 1024 ? 2 : 1);
 
             btnNext.addEventListener('click', () => {

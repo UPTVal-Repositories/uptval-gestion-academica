@@ -76,4 +76,22 @@ class Staff{
         
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    // Método analítico para el Dashboard
+    public static function getDashboardStats() {
+        $db = Database::getInstance();
+         
+        $query = "SELECT
+	                COUNT(id_staff) as total,
+	                SUM(CASE WHEN status = 'activo' THEN 1 ELSE 0 END) as activos,
+	                SUM(CASE WHEN status = 'inactivo' THEN 1 ELSE 0 END) as inactivos
+                  FROM
+	                staff";
+                    
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        
+        
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
 }
