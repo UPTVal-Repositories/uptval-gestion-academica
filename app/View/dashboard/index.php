@@ -36,7 +36,7 @@
             -webkit-backdrop-filter: blur(16px);
         }
         
-        /* Scrollbar personalizado */
+        /* Scrollbar personalizado general */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
@@ -49,6 +49,22 @@
         }
         .mobile-menu.open { transform: translateX(0); }
         body.menu-open { overflow: hidden; }
+
+        /* Animación para los gráficos del Dashboard */
+        @keyframes drawCircle {
+            from { stroke-dasharray: 0 100; }
+        }
+        .chart-circle {
+            animation: drawCircle 1.5s ease-out forwards;
+        }
+        /* Ocultar barra de scroll específicamente para el carrusel */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-slate-950 h-screen text-white font-sans flex flex-col overflow-hidden">
@@ -143,27 +159,22 @@
                     <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
-
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
                 </a>
-
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
-                
                 <div class="pt-6 mt-6 border-t border-gray-800">
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                         <i class="ph ph-gear text-xl"></i>
@@ -192,73 +203,218 @@
 
         <main class="flex-1 overflow-y-auto bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-10 relative z-10">
             
-            <header class="mb-6 sm:mb-10">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Panel de Control</h2>
-                <p class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">Visión general del sistema académico.</p>
+            <header class="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Panel Analítico</h2>
+                    <p class="text-slate-500 text-sm sm:text-base mt-1 sm:mt-2">Resumen estadístico y estado general del sistema.</p>
+                </div>
+                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto">
+                    <i class="ph ph-download-simple text-lg"></i>
+                    Exportar Reporte
+                </button>
             </header>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
-                <div class="bg-white border border-gray-200 shadow-sm p-4 sm:p-6 rounded-2xl">
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                
+                <a href="/personal" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs sm:text-sm text-gray-500 font-medium mb-1">Total Estudiantes</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800">1,248</h3>
+                            <p class="text-sm text-slate-500 font-medium">Total Personal</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">84</h3>
                         </div>
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <i class="ph ph-student text-2xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-gray-200 shadow-sm p-4 sm:p-6 rounded-2xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-500 font-medium mb-1">Personal Docente</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800">84</h3>
-                        </div>
-                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                        <div class="p-3 bg-orange-100 text-orange-600 rounded-xl">
                             <i class="ph ph-users text-2xl"></i>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-white border border-gray-200 shadow-sm p-4 sm:p-6 rounded-2xl">
+                </a>
+
+                <a href="/estudiantes" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs sm:text-sm text-gray-500 font-medium mb-1">Índice de Asistencia</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800">92%</h3>
+                            <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
                         </div>
-                        <div class="p-2 bg-green-50 text-green-600 rounded-lg">
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                            <i class="ph ph-student text-2xl"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/departamentos" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Departamentos</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">5</h3>
+                        </div>
+                        <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
+                            <i class="ph ph-buildings text-2xl"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/asistencia" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-green-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Asistencia Promedio</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">92%</h3>
+                        </div>
+                        <div class="p-3 bg-green-100 text-green-600 rounded-xl">
                             <i class="ph ph-calendar-check text-2xl"></i>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-white border border-gray-200 shadow-sm p-4 sm:p-6 rounded-2xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-500 font-medium mb-1">Tasa de Éxito</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800">88%</h3>
-                        </div>
-                        <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
-                            <i class="ph ph-chart-line-up text-2xl"></i>
-                        </div>
+                </a>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Desglose Analítico</h2>
+                        <p class="text-sm text-slate-500">Desliza para ver más métricas del sistema.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btnPrev" class="p-2.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-orange-500 shadow-sm transition-colors focus:outline-none">
+                            <i class="ph ph-caret-left text-lg"></i>
+                        </button>
+                        <button id="btnNext" class="p-2.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-orange-500 shadow-sm transition-colors focus:outline-none">
+                            <i class="ph ph-caret-right text-lg"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 sm:p-6">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-4">Actividad Reciente</h3>
-                <div class="text-sm text-gray-500 py-6 sm:py-8 text-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
-                    Seleccione una opción del menú lateral para cargar un módulo.
+                <div id="chartCarousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4 scroll-smooth">
+                    
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Estado del Personal</h3>
+                                    <p class="text-sm text-slate-500">Proporción de personal activo vs inactivo.</p>
+                                </div>
+                                <div class="p-2 bg-orange-50 text-orange-500 rounded-lg"><i class="ph ph-users text-xl"></i></div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#fee2e2" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="90 10" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">84</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-orange-500"></div><span class="text-sm font-medium text-slate-600">Activos</span></div>
+                                        <span class="text-base font-bold text-slate-900">76</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-200"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
+                                        <span class="text-base font-bold text-slate-900">8</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/personal" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Personal <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Estado Estudiantil</h3>
+                                    <p class="text-sm text-slate-500">Alumnos regulares frente a inactivos.</p>
+                                </div>
+                                <div class="p-2 bg-blue-50 text-blue-500 rounded-lg"><i class="ph ph-student text-xl"></i></div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
+                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
+                                        <span class="text-base font-bold text-slate-900">188</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/estudiantes" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Estudiantes <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Reporte de Asistencia</h3>
+                                    <p class="text-sm text-slate-500">Cumplimiento del periodo actual.</p>
+                                </div>
+                                <div class="p-2 bg-green-50 text-green-500 rounded-lg"><i class="ph ph-calendar-check text-xl"></i></div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#dcfce7" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="18" cy="18" r="15.915" fill="none" stroke="#22c55e" stroke-width="5" stroke-dasharray="92 8" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">92%</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Promedio</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-slate-600">Presentes</span></div>
+                                        <span class="text-base font-bold text-slate-900">+1.2k</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-200"></div><span class="text-sm font-medium text-slate-600">Ausencias</span></div>
+                                        <span class="text-base font-bold text-slate-900">84</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/asistencia" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-green-600 hover:text-green-700 hover:bg-green-50/50 transition-colors rounded-b-2xl">
+                                Ir a Control de Asistencia <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
+            </section>
 
         </main>
     </div>
 
     <script>
-        // Menú móvil
+        // Lógica existente del menú móvil
         const menuToggle = document.getElementById('menuToggle');
         const mobileSidebar = document.getElementById('mobileSidebar');
         const closeMenu = document.getElementById('closeMenu');
@@ -286,6 +442,24 @@
                 closeMenuFunc();
             }
         });
+
+        // NUEVA LÓGICA: Carrusel de Estadísticas
+        const carousel = document.getElementById('chartCarousel');
+        const btnNext = document.getElementById('btnNext');
+        const btnPrev = document.getElementById('btnPrev');
+
+        if(carousel && btnNext && btnPrev) {
+            // Calcula cuánto desplazar: el ancho de una tarjeta + el espacio "gap-6" (24px)
+            const scrollAmount = () => carousel.offsetWidth / (window.innerWidth >= 1024 ? 2 : 1);
+
+            btnNext.addEventListener('click', () => {
+                carousel.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+            });
+
+            btnPrev.addEventListener('click', () => {
+                carousel.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+            });
+        }
     </script>
 </body>
 </html>
