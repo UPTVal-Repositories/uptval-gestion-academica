@@ -20,7 +20,8 @@ class Staff{
 	                s.type_staff,
 	                s.status,
 	                d.name,
-	                u.cedula 
+	                u.cedula,
+                    s.pas 
                 FROM 
 	                staff s 
                 INNER JOIN `user` u on 
@@ -61,7 +62,8 @@ class Staff{
 	                s.status,
 	                s.sex,
 	                s.phone,
-	                s.id_staff 
+	                s.id_staff,
+                    s.pas 
                 FROM 
 	                staff s 
                 INNER JOIN `user` u on s.id_user = u.id_user

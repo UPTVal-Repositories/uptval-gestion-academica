@@ -5,6 +5,7 @@
  * @var string $page
  * @var string $totalPages
  * @var array $staffList
+ * @var array $departamentos
  */
 ?>
 
@@ -238,17 +239,45 @@
                             <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula o nombre...">
                         </div>
                         
-                        <div class="flex w-full sm:w-auto gap-2">
-                            <select class="block w-full sm:w-auto pl-3 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
-                                <option value="">Todos los Departamentos</option>
-                                <option value="1">Informática</option>
-                                <option value="2">Electricidad</option>
-                            </select>
-                            <select class="block w-full sm:w-auto pl-3 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
-                                <option value="">Todos los Tipos</option>
-                                <option value="Docente">Docente</option>
-                                <option value="Administrativo">Administrativo</option>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+    
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                    Departamento
+                                </label>
+                                <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los Departamentos</option>
+                                    <?php foreach ($departamentos as $depto): ?>
+                                        <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                            <?php echo htmlspecialchars($depto['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                    Tipo
+                                </label>
+                                <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los Tipos</option>
+                                    <option value="Docente">Docente</option>
+                                    <option value="Administrativo">Administrativo</option>
+                                </select>
+                            </div>
+
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-blac tracking-wider pointer-events-none z-10">
+                                    Estatus
+                                </label>
+                                <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los Estatus</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                </select>
+                            </div>
+
                         </div>
                     </div>
 
@@ -306,7 +335,7 @@
 
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-gray-900">
-                                                    <?php echo htmlspecialchars($person['type_staff']); ?>
+                                                    <?php echo htmlspecialchars($person['pas'].' - '. $person['type_staff']); ?>
                                                 </div>
                                                 <div class="text-sm text-gray-500">
                                                     <?php echo htmlspecialchars($person['name'] ?? 'Sin Asignar'); ?>

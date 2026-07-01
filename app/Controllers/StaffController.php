@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Core\Session;
 use Models\Staff;
+use Models\Department;
 
 class StaffController{
 
@@ -48,6 +49,8 @@ class StaffController{
         }
 
         $staffList = Staff::paginate($limit, $offset);
+
+        $departamentos = \Models\Department::all();
 
         /*echo "<pre style='background: #111; color: #0f0; padding: 20px; z-index: 9999; position: relative;'>";
             print_r($totalRecords);
