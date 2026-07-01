@@ -461,7 +461,7 @@
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="flex items-center gap-2 font-bold text-slate-700 text-sm sm:text-base">
                                             <div class="w-3 h-3 rounded-full bg-uptval-orange shadow-sm shadow-orange-200"></div> 
-                                            Admin (30%)
+                                            Administrativos (30%)
                                         </span>
                                         <span class="font-extrabold text-slate-900 text-lg">36</span>
                                     </div>
@@ -475,7 +475,7 @@
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="flex items-center gap-2 font-bold text-slate-700 text-sm sm:text-base">
                                             <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></div> 
-                                            Mixto / Obrero (10%)
+                                            Obreros (10%)
                                         </span>
                                         <span class="font-extrabold text-slate-900 text-lg">12</span>
                                     </div>
