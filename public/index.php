@@ -36,6 +36,7 @@ $router->post('logout', 'AuthController', 'logout');
 
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal', 'StaffController', 'index');
+$router->post('personal/toggle-status', 'StaffController', 'toggleStatus');
 
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];

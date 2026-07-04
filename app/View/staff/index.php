@@ -7,6 +7,9 @@
  * @var array $staffList
  * @var array $departamentos
  */
+
+$flash = $_SESSION['flash_message'] ?? null;
+unset($_SESSION['flash_message']);
 ?>
 
 <!DOCTYPE html>
@@ -63,9 +66,40 @@
         .chart-circle {
             animation: drawCircle 1.5s ease-out forwards;
         }
+
+        @keyframes shrink {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .animate-shrink {
+            animation: shrink 4s linear forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-950 h-screen text-white font-sans flex flex-col overflow-hidden">
+
+    <div id="toast" class="fixed top-6 right-6 z-[200] transform transition-all duration-500 translate-x-[150%] opacity-0 w-full max-w-sm bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
+        <div class="p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0" id="toast-icon-container"></div>
+                <div class="ml-3 w-0 flex-1 pt-0.5">
+                    <p id="toast-title" class="text-sm font-medium text-gray-900"></p>
+                    <p id="toast-message" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button type="button" onclick="hideToast()" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-uptval-orange transition-colors">
+                        <span class="sr-only">Cerrar</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="h-1 bg-gray-50 w-full">
+            <div id="toast-progress" class="h-full w-full"></div>
+        </div>
+    </div>
 
         <nav class="glass-panel border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50 shrink-0">
             <div class="flex items-center gap-2">
@@ -236,12 +270,12 @@
                             </nav>
                         </div>
 
-                        <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <form method="GET" action="/personal" class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                             <div class="relative w-full sm:max-w-xs">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="ph ph-magnifying-glass text-gray-400"></i>
                                 </div>
-                                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula o nombre...">
+                                <input type="text" name="search" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula o nombre...">
                             </div>
                             
 
@@ -251,10 +285,10 @@
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
                                         Departamento
                                     </label>
-                                    <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <select name="department_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
                                         <option value="">Todos los Departamentos</option>
                                         <?php foreach ($departamentos as $depto): ?>
-                                            <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                            <option value="<?php echo htmlspecialchars($depto['id_department']); ?>" <?php echo (($_GET['department_filter'] ?? '') == $depto['id_department']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($depto['name']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -265,10 +299,11 @@
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
                                         Tipo
                                     </label>
-                                    <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <select name="type_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
                                         <option value="">Todos los Tipos</option>
-                                        <option value="Docente">Docente</option>
-                                        <option value="Administrativo">Administrativo</option>
+                                        <option value="Administrativo" <?php echo (($_GET['type_filter'] ?? '') === 'Administrativo') ? 'selected' : ''; ?>>Administrativo</option>
+                                        <option value="Docente" <?php echo (($_GET['type_filter'] ?? '') === 'Docente') ? 'selected' : ''; ?>>Docente</option>                                        
+                                        <option value="Obrero" <?php echo (($_GET['type_filter'] ?? '') === 'Obrero') ? 'selected' : ''; ?>>Obrero</option>
                                     </select>
                                 </div>
 
@@ -276,15 +311,15 @@
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-blac tracking-wider pointer-events-none z-10">
                                         Estatus
                                     </label>
-                                    <select class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <select name="status_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
                                         <option value="">Todos los Estatus</option>
-                                        <option value="activo">Activo</option>
-                                        <option value="inactivo">Inactivo</option>
+                                        <option value="activo" <?php echo (($_GET['status_filter'] ?? '') === 'activo') ? 'selected' : ''; ?>>Activo</option>
+                                        <option value="inactivo" <?php echo (($_GET['status_filter'] ?? '') === 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
                                     </select>
                                 </div>
 
                             </div>
-                        </div>
+                        </form>
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -298,7 +333,14 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($staffList)): ?>
+                                    <?php if (empty($staffList) && !empty($_GET['department_filter'] ?? $_GET['type_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? '')): ?>
+                                        <tr>
+                                            <td colspan="5" class="py-10 text-center text-gray-500 bg-gray-50">
+                                                <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
+                                                No se encontraron resultados con los filtros aplicados.
+                                            </td>
+                                        </tr>
+                                    <?php elseif (empty($staffList)): ?>
                                         <tr>
                                             <td colspan="5" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-user-circle-minus text-5xl mb-3 block opacity-50"></i>
@@ -368,11 +410,11 @@
                                                             <i class="ph ph-pencil-simple text-xl"></i>
                                                         </button>
                                                         <?php if ($person['status'] === 'activo'): ?>
-                                                            <button class="text-slate-400 hover:text-red-600 transition-colors p-1" title="Inactivar">
+                                                            <button onclick="openToggleStatus(<?= $person['id_staff'] ?>, '<?= htmlspecialchars($person['last_name'] . ', ' . $person['first_name'], ENT_QUOTES) ?>', 'activo')" class="text-slate-400 hover:text-red-600 transition-colors p-1" title="Inactivar">
                                                                 <i class="ph ph-prohibit text-xl"></i>
                                                             </button>
                                                         <?php else: ?>
-                                                            <button class="text-slate-400 hover:text-green-600 transition-colors p-1" title="Reactivar">
+                                                            <button onclick="openToggleStatus(<?= $person['id_staff'] ?>, '<?= htmlspecialchars($person['last_name'] . ', ' . $person['first_name'], ENT_QUOTES) ?>', 'inactivo')" class="text-slate-400 hover:text-green-600 transition-colors p-1" title="Reactivar">
                                                                 <i class="ph ph-check-circle text-xl"></i>
                                                             </button>
                                                         <?php endif; ?>
@@ -387,9 +429,17 @@
                         </div>
 
                         <div class="flex items-center justify-center border-t border-gray-200 bg-gray-50/50 px-4 py-4 sm:px-6 w-full">
+                            <?php
+                                $filterQuery = [];
+                                if (!empty($_GET['department_filter'])) $filterQuery['department_filter'] = $_GET['department_filter'];
+                                if (!empty($_GET['type_filter'])) $filterQuery['type_filter'] = $_GET['type_filter'];
+                                if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                                if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
+                                $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';
+                            ?>
                             <div class="flex items-center gap-6">
                                 <?php if ($page > 1): ?>
-                                    <a href="/personal?page=<?= $page - 1 ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    <a href="/personal?page=<?= $page - 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                                         Anterior
                                     </a>
                                 <?php else: ?>
@@ -406,7 +456,7 @@
                                 </div>
 
                                 <?php if ($page < $totalPages): ?>
-                                    <a href="/personal?page=<?= $page + 1 ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    <a href="/personal?page=<?= $page + 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                                         Siguiente
                                     </a>
                                 <?php else: ?>
@@ -424,66 +474,59 @@
                             <i class="ph ph-chart-donut text-uptval-orange text-xl"></i> Resumen General de la Consulta
                         </h3>
                         
+                        <?php
+                        $typeColors = [
+                            'Docente'        => ['hex' => '#3b82f6', 'bg' => 'bg-blue-500', 'shadow' => 'shadow-blue-200'],
+                            'Administrativo' => ['hex' => '#f97316', 'bg' => 'bg-uptval-orange', 'shadow' => 'shadow-orange-200'],
+                            'Obrero'         => ['hex' => '#10b981', 'bg' => 'bg-emerald-500', 'shadow' => 'shadow-emerald-200'],
+                        ];
+                        $totalStaff = array_sum(array_column($statsByType, 'total'));
+                        $runningPercent = 0;
+                        $typeCount = count($statsByType);
+                        ?>
+                        
                         <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-10">
                             
                             <div class="relative w-40 h-40 sm:w-48 sm:h-48 shrink-0">
                                 <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90 drop-shadow-md">
-                                    <circle cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="6" stroke-dasharray="60 40" stroke-dashoffset="0" class="transition-all duration-1000 ease-out"></circle>
-                                    
-                                    <circle cx="20" cy="20" r="15.915" fill="none" stroke="#f97316" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="-60" class="transition-all duration-1000 ease-out"></circle>
-                                    
-                                    <circle cx="20" cy="20" r="15.915" fill="none" stroke="#10b981" stroke-width="6" stroke-dasharray="10 90" stroke-dashoffset="-90" class="transition-all duration-1000 ease-out"></circle>
+                                    <?php foreach ($statsByType as $type): 
+                                        $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100, 1) : 0;
+                                        $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280', 'bg' => 'bg-gray-500', 'shadow' => 'shadow-gray-200'];
+                                    ?>
+                                    <circle cx="20" cy="20" r="15.915" fill="none" stroke="<?= $color['hex'] ?>" stroke-width="6" stroke-dasharray="<?= $percent ?> <?= 100 - $percent ?>" stroke-dashoffset="-<?= $runningPercent ?>" class="transition-all duration-1000 ease-out"></circle>
+                                    <?php 
+                                        $runningPercent += $percent;
+                                    endforeach; 
+                                    ?>
                                 </svg>
                                 
                                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">120</span>
+                                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-800"><?= $totalStaff ?></span>
                                     <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Registros</span>
                                 </div>
                             </div>
                             
                             <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
                                 
-                                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                                <?php foreach ($statsByType as $i => $type): 
+                                    $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100) : 0;
+                                    $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280', 'bg' => 'bg-gray-500', 'shadow' => 'shadow-gray-200'];
+                                    $isLast = $i === $typeCount - 1;
+                                ?>
+                                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 <?= $isLast && $typeCount === 3 ? 'sm:col-span-2' : '' ?>">
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="flex items-center gap-2 font-bold text-slate-700 text-sm sm:text-base">
-                                            <div class="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-200"></div> 
-                                            Docentes (60%)
+                                            <div class="w-3 h-3 rounded-full <?= $color['bg'] ?> shadow-sm <?= $color['shadow'] ?>"></div> 
+                                            <?= htmlspecialchars($type['pas']) ?>s (<?= $percent ?>%)
                                         </span>
-                                        <span class="font-extrabold text-slate-900 text-lg">72</span>
+                                        <span class="font-extrabold text-slate-900 text-lg"><?= $type['total'] ?></span>
                                     </div>
                                     <div class="flex gap-3 text-[11px] sm:text-xs font-medium pl-5">
-                                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-check-circle"></i> 65 Activos</span>
-                                        <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-prohibit"></i> 7 Inactivos</span>
+                                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-check-circle"></i> <?= $type['activos'] ?> Activos</span>
+                                        <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-prohibit"></i> <?= $type['inactivos'] ?> Inactivos</span>
                                     </div>
                                 </div>
-
-                                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="flex items-center gap-2 font-bold text-slate-700 text-sm sm:text-base">
-                                            <div class="w-3 h-3 rounded-full bg-uptval-orange shadow-sm shadow-orange-200"></div> 
-                                            Administrativos (30%)
-                                        </span>
-                                        <span class="font-extrabold text-slate-900 text-lg">36</span>
-                                    </div>
-                                    <div class="flex gap-3 text-[11px] sm:text-xs font-medium pl-5">
-                                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-check-circle"></i> 30 Activos</span>
-                                        <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-prohibit"></i> 6 Inactivos</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 sm:col-span-2">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="flex items-center gap-2 font-bold text-slate-700 text-sm sm:text-base">
-                                            <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></div> 
-                                            Obreros (10%)
-                                        </span>
-                                        <span class="font-extrabold text-slate-900 text-lg">12</span>
-                                    </div>
-                                    <div class="flex gap-3 text-[11px] sm:text-xs font-medium pl-5">
-                                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-check-circle"></i> 10 Activos</span>
-                                        <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-prohibit"></i> 2 Inactivos</span>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
 
                             </div>
                         </div>
@@ -494,7 +537,7 @@
         </div>
 
     <div id="modalRegistrar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform" id="modalContent">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform modal-content" id="modalContent">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
                 <h3 class="text-lg font-bold">Registrar Nuevo Personal</h3>
                 <button onclick="toggleModal('modalRegistrar')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
@@ -534,6 +577,37 @@
             </div>
         </div>
     </div>
+
+    <div id="modalToggleStatus" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <i class="ph ph-warning-circle text-amber-500 text-xl"></i>
+                    Cambiar Estado
+                </h3>
+                <button onclick="toggleModal('modalToggleStatus')" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center" id="modalToggleIconWrap">
+                    <i class="ph ph-prohibit text-3xl text-amber-600" id="modalToggleIcon"></i>
+                </div>
+                <p class="text-gray-700 text-sm mb-1">¿Estás seguro de que deseas</p>
+                <p class="text-gray-900 font-bold text-lg" id="modalToggleAction">inactivar</p>
+                <p class="text-gray-700 text-sm mt-1">a <span class="font-semibold" id="modalToggleName">---</span>?</p>
+                <p class="text-xs text-gray-500 mt-3">Su estado actual pasará de <span class="font-medium" id="modalToggleFrom">activo</span> a <span class="font-medium" id="modalToggleTo">inactivo</span>.</p>
+            </div>
+            <form method="POST" action="/personal/toggle-status" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
+                <input type="hidden" name="id_staff" id="modalToggleId" value="">
+                <button type="button" onclick="toggleModal('modalToggleStatus')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2" id="modalToggleConfirmBtn">
+                    <i class="ph ph-check-circle text-lg"></i>
+                    Sí, cambiar estado
+                </button>
+            </form>
+        </div>
+    </div>
     
     <script>
         // Lógica del Menú Móvil
@@ -565,7 +639,7 @@
         // Lógica del Modal
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
-            const content = document.getElementById('modalContent');
+            const content = modal.querySelector('.modal-content');
             if (modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -582,6 +656,85 @@
                 }, 150);
             }
         }
+
+        function openToggleStatus(id, name, status) {
+            const isActive = status === 'activo';
+            const actionText = isActive ? 'inactivar' : 'reactivar';
+            const fromText = isActive ? 'activo' : 'inactivo';
+            const toText = isActive ? 'inactivo' : 'activo';
+
+            document.getElementById('modalToggleId').value = id;
+            document.getElementById('modalToggleName').textContent = name;
+            document.getElementById('modalToggleAction').textContent = actionText;
+            document.getElementById('modalToggleFrom').textContent = fromText;
+            document.getElementById('modalToggleTo').textContent = toText;
+
+            const icon = document.getElementById('modalToggleIcon');
+            const iconWrap = document.getElementById('modalToggleIconWrap');
+            const confirmBtn = document.getElementById('modalToggleConfirmBtn');
+
+            if (isActive) {
+                icon.className = 'ph ph-prohibit text-3xl text-red-500';
+                iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center';
+                confirmBtn.className = 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2';
+            } else {
+                icon.className = 'ph ph-check-circle text-3xl text-green-600';
+                iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center';
+                confirmBtn.className = 'px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2';
+            }
+
+            toggleModal('modalToggleStatus');
+        }
+
+        // =========================================================
+        // LÓGICA DE NOTIFICACIONES (TOASTS)
+        // =========================================================
+        const icons = {
+            success: `<svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+            error: `<svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+        };
+
+        function showToast(type, title, message) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastProgress = document.getElementById('toast-progress');
+            const iconContainer = document.getElementById('toast-icon-container');
+
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+
+            if (type === 'error') {
+                iconContainer.innerHTML = icons.error;
+                toastProgress.className = 'h-full w-full bg-red-400';
+            } else {
+                iconContainer.innerHTML = icons.success;
+                toastProgress.className = 'h-full w-full bg-green-400';
+            }
+
+            toastProgress.classList.remove('animate-shrink');
+            void toastProgress.offsetWidth;
+            toastProgress.classList.add('animate-shrink');
+
+            toast.classList.remove('translate-x-[150%]', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(() => { hideToast(); }, 4000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-x-0', 'opacity-100');
+            toast.classList.add('translate-x-[150%]', 'opacity-0');
+        }
     </script>
+
+    <?php if ($flash): ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            showToast('<?= $flash['type'] ?>', '<?= addslashes($flash['title']) ?>', '<?= addslashes($flash['message']) ?>');
+        });
+    </script>
+    <?php endif; ?>
 </body>
 </html>

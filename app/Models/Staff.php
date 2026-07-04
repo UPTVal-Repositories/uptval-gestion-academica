@@ -96,4 +96,158 @@ class Staff{
         
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
+
+    public static function toggleStatus($idStaff) {
+        $db = Database::getInstance();
+
+        $query = "SELECT status FROM staff WHERE id_staff = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', (int) $idStaff, \PDO::PARAM_INT);
+        $stmt->execute();
+        $current = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$current) {
+            return false;
+        }
+
+        $newStatus = $current['status'] === 'activo' ? 'inactivo' : 'activo';
+
+        $update = "UPDATE staff SET status = :status WHERE id_staff = :id";
+        $stmt = $db->prepare($update);
+        $stmt->bindValue(':status', $newStatus);
+        $stmt->bindValue(':id', (int) $idStaff, \PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public static function getStatus($idStaff) {
+        $db = Database::getInstance();
+        $query = "SELECT status FROM staff WHERE id_staff = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', (int) $idStaff, \PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ? $row['status'] : null;
+    }
+
+    public static function getStatsByType($departmentId = null) {
+        $db = Database::getInstance();
+
+        $sql = "SELECT
+                    s.pas,
+                    COUNT(s.id_staff) as total,
+                    SUM(CASE WHEN s.status = 'activo' THEN 1 ELSE 0 END) as activos,
+                    SUM(CASE WHEN s.status = 'inactivo' THEN 1 ELSE 0 END) as inactivos
+                FROM
+                    staff s";
+
+        $params = [];
+        if (!empty($departmentId)) {
+            $sql .= " WHERE s.id_department = :dept";
+            $params[':dept'] = $departmentId;
+        }
+
+        $sql .= " GROUP BY s.pas ORDER BY s.pas ASC";
+
+        $stmt = $db->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public static function countFilter($filters = []) {
+        $db = Database::getInstance();
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['id_department'])) {
+            $where[] = "s.id_department = :dept";
+            $params[':dept'] = $filters['id_department'];
+        }
+        if (!empty($filters['type_staff'])) {
+            $where[] = "s.pas = :type";
+            $params[':type'] = $filters['type_staff'];
+        }
+        if (!empty($filters['status'])) {
+            $where[] = "s.status = :status";
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['search'])) {
+            $where[] = "(u.cedula LIKE :search OR s.first_name LIKE :search OR s.last_name LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        $sql = "SELECT COUNT(s.id_staff) as total 
+                FROM staff s 
+                INNER JOIN `user` u ON s.id_user = u.id_user
+                INNER JOIN department d ON s.id_department = d.id_department";
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+
+        $stmt = $db->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+    public static function filter($filters = [], $limit = null, $offset = null) {
+        $db = Database::getInstance();
+        $where = [];
+        $params = [];
+
+        // Construir condiciones dinámicas
+        if (!empty($filters['id_department'])) {
+            $where[] = "s.id_department = :dept";
+            $params[':dept'] = $filters['id_department'];
+        }
+        if (!empty($filters['type_staff'])) {
+            $where[] = "s.pas = :type";
+            $params[':type'] = $filters['type_staff'];
+        }
+        if (!empty($filters['status'])) {
+            $where[] = "s.status = :status";
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['search'])) {
+            $where[] = "(u.cedula LIKE :search OR s.first_name LIKE :search OR s.last_name LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        $sql = "SELECT u.cedula, s.first_name, s.last_name, s.email, s.type_staff, 
+                       d.name, s.status, s.sex, s.phone, s.id_staff, s.pas 
+                FROM staff s 
+                INNER JOIN `user` u on s.id_user = u.id_user
+                INNER JOIN department d on s.id_department = d.id_department";
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+
+        $sql .= " ORDER BY s.last_name ASC";
+
+        if ($limit !== null && $offset !== null) {
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+
+        $stmt = $db->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        
+        if ($limit !== null && $offset !== null) {
+            $stmt->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int) $offset, \PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
