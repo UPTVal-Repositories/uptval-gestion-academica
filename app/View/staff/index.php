@@ -256,10 +256,25 @@ unset($_SESSION['flash_message']);
                         <h2 class="text-2xl font-bold text-gray-900">Gestión de Personal</h2>
                         <p class="text-sm text-gray-500 mt-1">Administra docentes, administrativos y asignaciones académicas.</p>
                     </div>
-                    <button onclick="toggleModal('modalRegistrar')" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
-                        <i class="ph ph-plus-circle text-lg"></i>
-                        Registrar Personal
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <?php
+                            $filterQuery = [];
+                            if (!empty($_GET['department_filter'])) $filterQuery['department_filter'] = $_GET['department_filter'];
+                            if (!empty($_GET['type_filter'])) $filterQuery['type_filter'] = $_GET['type_filter'];
+                            if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                            if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
+                            $pdfUrl = '/personal/export-pdf' . (!empty($filterQuery) ? '?' . http_build_query($filterQuery) : '');
+                        ?>
+                        <a href="<?= $pdfUrl ?>"
+                           class="bg-white border border-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-50 w-full sm:w-auto">
+                            <i class="ph ph-file-pdf text-lg text-red-500"></i>
+                            Exportar PDF
+                        </a>
+                        <button onclick="toggleModal('modalRegistrar')" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
+                            <i class="ph ph-plus-circle text-lg"></i>
+                            Registrar Personal
+                        </button>
+                    </div>
                 </header>
 
                 <div class="p-4 sm:p-6 md:p-8 flex-1">

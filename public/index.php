@@ -35,6 +35,7 @@ $router->get('dashboard', 'DashboardController', 'index');
 $router->post('logout', 'AuthController', 'logout');
 
 // --- NUEVA RUTA: Gestión de Personal ---
+$router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal', 'StaffController', 'index');
 $router->post('personal/toggle-status', 'StaffController', 'toggleStatus');
 
