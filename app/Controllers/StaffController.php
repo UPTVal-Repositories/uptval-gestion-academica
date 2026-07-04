@@ -184,7 +184,7 @@ class StaffController{
         <body>
             <div class="header">
                 <h1><span>UPT</span>Val</h1>
-                <p>Universidad Politécnica Territorial del Valle de los Mocotíes</p>
+                <p>Universidad Politécnica Territorial de Valencia</p>
             </div>
             <div class="meta">
                 <span><strong>Generado por:</strong> ' . $generatedBy . '</span>
