@@ -141,26 +141,15 @@ class StaffController{
         ];
 
         $staffList = Staff::filter($filters);
-
-        $rowsHtml = '';
-        foreach ($staffList as $person) {
-            $statusBadge = $person['status'] === 'activo'
-                ? '<span style="color:#16a34a;font-weight:600;">Activo</span>'
-                : '<span style="color:#dc2626;font-weight:600;">Inactivo</span>';
-            $rowsHtml .= '<tr>
-                <td>' . htmlspecialchars($person['cedula']) . '</td>
-                <td>' . htmlspecialchars($person['last_name'] . ', ' . $person['first_name']) . '</td>
-                <td>' . htmlspecialchars($person['pas']) . '</td>
-                <td>' . htmlspecialchars($person['name'] ?? 'Sin Asignar') . '</td>
-                <td>' . $statusBadge . '</td>
-            </tr>';
-        }
+        $totalRecords = count($staffList);
+        $perPage = 50;
+        $chunks = array_chunk($staffList, $perPage);
+        $totalPages = count($chunks);
 
         $generatedBy = "C.I: " . htmlspecialchars($cedula ?? '---');
         $dateTime = date('d/m/Y - h:i A');
 
-        $html = '
-        <!DOCTYPE html>
+        $html = '<!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
@@ -173,24 +162,35 @@ class StaffController{
                 .header p { margin: 4px 0 0; font-size: 8pt; color: #64748b; }
                 .meta { font-size: 8pt; color: #475569; margin-bottom: 16px; }
                 .meta span { display: inline-block; margin-right: 24px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+                .record-count { font-size: 8pt; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+                table { width: 100%; border-collapse: collapse; }
                 th { background-color: #0f172a; color: #ffffff; padding: 8px 10px; text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; }
                 td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
                 tr:nth-child(even) td { background-color: #f8fafc; }
-                .footer { text-align: center; margin-top: 24px; font-size: 7pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
-                .total { text-align: right; font-size: 9pt; font-weight: 600; margin-top: 12px; color: #0f172a; }
+                .page-break { page-break-after: always; }
+                .page-info { text-align: center; font-size: 7pt; color: #94a3b8; margin-top: 16px; }
             </style>
         </head>
-        <body>
-            <div class="header">
-                <h1><span>UPT</span>Val</h1>
-                <p>Universidad Politécnica Territorial de Valencia</p>
-            </div>
-            <div class="meta">
-                <span><strong>Generado por:</strong> ' . $generatedBy . '</span>
-                <span><strong>Fecha:</strong> ' . $dateTime . '</span>
-            </div>
-            <table>
+        <body>';
+
+        foreach ($chunks as $index => $chunk) {
+            if ($index > 0) {
+                $html .= '<div class="page-break"></div>';
+            }
+
+            if ($index === 0) {
+                $html .= '<div class="header">
+                    <h1><span>UPT</span>Val</h1>
+                    <p>Universidad Politécnica Territorial de Valencia</p>
+                </div>
+                <div class="meta">
+                    <span><strong>Generado por:</strong> ' . $generatedBy . '</span>
+                    <span><strong>Fecha:</strong> ' . $dateTime . '</span>
+                    <span><strong>Total de registros:</strong> ' . $totalRecords . '</span>
+                </div>';
+            }
+
+            $html .= '<table>
                 <thead>
                     <tr>
                         <th>Cédula</th>
@@ -200,19 +200,42 @@ class StaffController{
                         <th>Estatus</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ' . $rowsHtml . '
-                </tbody>
-            </table>
-            <div class="total">Total de registros: ' . count($staffList) . '</div>
-            <div class="footer">Sistema de Gestión Académica UPTVal — Reporte generado el ' . $dateTime . '</div>
-        </body>
-        </html>';
+                <tbody>';
+
+            foreach ($chunk as $person) {
+                $statusBadge = $person['status'] === 'activo'
+                    ? '<span style="color:#16a34a;font-weight:600;">Activo</span>'
+                    : '<span style="color:#dc2626;font-weight:600;">Inactivo</span>';
+                $html .= '<tr>
+                    <td>' . htmlspecialchars($person['cedula']) . '</td>
+                    <td>' . htmlspecialchars($person['last_name'] . ', ' . $person['first_name']) . '</td>
+                    <td>' . htmlspecialchars($person['pas']) . '</td>
+                    <td>' . htmlspecialchars($person['name'] ?? 'Sin Asignar') . '</td>
+                    <td>' . $statusBadge . '</td>
+                </tr>';
+            }
+
+            $html .= '</tbody>
+            </table>';
+        }
+
+        $html .= '</body></html>';
 
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
+        $canvas->page_script(function($pageNumber, $pageCount) use ($font, $fontMetrics, $canvas) {
+            $text = "Página $pageNumber de $pageCount";
+            $textWidth = $fontMetrics->getTextWidth($text, $font, 8);
+            $x = ($canvas->get_width() - $textWidth) / 2;
+            $canvas->text($x, $canvas->get_height() - 20, $text, $font, 8);
+        });
+
         $dompdf->stream('personal_' . date('Ymd_His') . '.pdf', ['Attachment' => true]);
         exit;
     }
