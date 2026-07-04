@@ -101,6 +101,8 @@ class StaffController{
         $departamentos = \Models\Department::all();
         $statsByType = Staff::getStatsByType($filters['id_department']);
 
+        $userRoles = Session::get('user_roles') ?? [];
+
         require_once __DIR__ . '/../View/staff/index.php';
     }
 

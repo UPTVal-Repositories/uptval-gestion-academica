@@ -25,10 +25,12 @@ class DashboardController {
 
         $staffStats = Staff::getDashboardStats();
 
-       
+        
         $total_staff     = $staffStats['total'] ?? 0;
         $activos_staff   = $staffStats['activos'] ?? 0;
         $inactivos_staff = $staffStats['inactivos'] ?? 0;
+
+        $userRoles = Session::get('user_roles') ?? [];
 
 
         if (!empty($last_connection_raw)) {

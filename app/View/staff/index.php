@@ -6,6 +6,7 @@
  * @var string $totalPages
  * @var array $staffList
  * @var array $departamentos
+ * @var array $userRoles
  */
 
 $flash = $_SESSION['flash_message'] ?? null;
@@ -149,27 +150,34 @@ unset($_SESSION['flash_message']);
             <span class="font-medium text-sm">Inicio</span>
         </a>
 
+        <?php if (in_array('Administrador', $userRoles)): ?>
         <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
             <i class="ph ph-buildings text-xl"></i>
             <span class="font-medium text-sm">Gestión de Departamentos</span>
         </a>
+        <?php endif; ?>
 
+        <?php if (in_array('Administrador', $userRoles)): ?>
         <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
             <i class="ph ph-users text-xl"></i>
             <span class="font-medium text-sm">Gestión de Personal</span>
         </a>
+        <?php endif; ?>
 
         <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
             <i class="ph ph-student text-xl"></i>
             <span class="font-medium text-sm">Estudiantes</span>
         </a>
 
+        <?php if (in_array('Administrador', $userRoles)): ?>
         <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
             <i class="ph ph-calendar-check text-xl"></i>
             <span class="font-medium text-sm">Control de Asistencia</span>
         </a>
+        <?php endif; ?>
     </nav>
 
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <div class="mt-8">
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
@@ -177,6 +185,7 @@ unset($_SESSION['flash_message']);
                         <span class="font-medium text-sm">Configuración</span>
                     </a>
                 </div>
+                <?php endif; ?>
             </aside>
 
             <div id="mobileSidebar" class="mobile-menu fixed top-0 left-0 h-full w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 z-50 md:hidden shadow-2xl">
@@ -192,6 +201,7 @@ unset($_SESSION['flash_message']);
                         <i class="ph ph-squares-four text-xl"></i>
                         <span class="font-medium text-sm">Inicio</span>
                     </a>
+                    <?php if (in_array('Administrador', $userRoles)): ?>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-buildings text-xl"></i>
                         <span class="font-medium text-sm">Gestión de Departamentos</span>
@@ -200,10 +210,12 @@ unset($_SESSION['flash_message']);
                         <i class="ph ph-users text-xl"></i>
                         <span class="font-medium text-sm">Gestión de Personal</span>
                     </a>
+                    <?php endif; ?>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-student text-xl"></i>
                         <span class="font-medium text-sm">Estudiantes</span>
                     </a>
+                    <?php if (in_array('Administrador', $userRoles)): ?>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-calendar-check text-xl"></i>
                         <span class="font-medium text-sm">Control de Asistencia</span>
@@ -215,6 +227,7 @@ unset($_SESSION['flash_message']);
                             <span class="font-medium text-sm">Configuración</span>
                         </a>
                     </div>
+                    <?php endif; ?>
                 </nav>
                 
                 <div class="mt-auto pt-4 border-t border-gray-800">

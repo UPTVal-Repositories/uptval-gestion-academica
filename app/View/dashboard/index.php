@@ -5,6 +5,7 @@
  * @var string $total_staff
  * @var string $activos_staff
  * @var string $inactivos_staff
+ * @var array $userRoles
  */
 ?>
 
@@ -118,6 +119,7 @@
                     <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
@@ -126,16 +128,20 @@
                     <i class="ph ph-users text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
+                <?php endif; ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
                 </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
+                <?php endif; ?>
             </nav>
 
+            <?php if (in_array('Administrador', $userRoles)): ?>
             <div class="mt-8">
                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
@@ -143,6 +149,7 @@
                     <span class="font-medium text-sm">Configuración</span>
                 </a>
             </div>
+            <?php endif; ?>
         </aside>
 
         <div id="mobileSidebar" class="mobile-menu fixed top-0 left-0 h-full w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 z-50 md:hidden shadow-2xl">
@@ -158,6 +165,7 @@
                     <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
@@ -166,10 +174,12 @@
                     <i class="ph ph-users text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
+                <?php endif; ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
                 </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
@@ -180,6 +190,7 @@
                         <span class="font-medium text-sm">Configuración</span>
                     </a>
                 </div>
+                <?php endif; ?>
             </nav>
             
             <div class="mt-auto pt-4 border-t border-gray-800">
@@ -207,12 +218,15 @@
                     <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Panel Analítico</h2>
                     <p class="text-slate-500 text-sm sm:text-base mt-1 sm:mt-2">Resumen estadístico y estado general del sistema.</p>
                 </div>
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto">
                     <i class="ph ph-download-simple text-lg"></i>
                     Exportar Reporte
                 </button>
+                <?php endif; ?>
             </header>
 
+            <?php if (in_array('Administrador', $userRoles)): ?>
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 
                 <a href="/personal" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group relative overflow-hidden">
@@ -416,6 +430,68 @@
 
                 </div>
             </section>
+            <?php endif; ?>
+
+            <?php if (in_array('Control de Estudio', $userRoles)): ?>
+            <section class="mb-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="/estudiantes" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group relative overflow-hidden sm:col-span-2 lg:col-span-1">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
+                                <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
+                            </div>
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                                <i class="ph ph-student text-2xl"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Estado Estudiantil</h2>
+                        <p class="text-sm text-slate-500">Alumnos regulares frente a inactivos.</p>
+                    </div>
+                </div>
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
+                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
+                                        <span class="text-base font-bold text-slate-900">188</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/estudiantes" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Estudiantes <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <?php endif; ?>
 
         </main>
     </div>

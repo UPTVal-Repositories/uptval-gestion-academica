@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Models\User;
+use Models\RolUser;
 use Core\Session;
 
 class AuthController{
@@ -49,6 +50,10 @@ class AuthController{
                         // Guardamos la fecha de su sesión anterior y actualizamos a la actual
                         Session::set('last_connection', $user['last_connection']);
                         User::updateLastConnection($user['id_user']);
+
+                        // Cargar roles del usuario en sesión
+                        $roles = RolUser::getRolesByUserId($user['id_user']);
+                        Session::set('user_roles', $roles);
 
                         // Lógica de "Recordarme"
                         if (isset($_POST['remember'])) {
