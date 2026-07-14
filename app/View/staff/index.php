@@ -6,6 +6,8 @@
  * @var string $totalPages
  * @var array $staffList
  * @var array $departamentos
+ * @var array $conditions
+ * @var array $contractTypes
  * @var array $userRoles
  */
 
@@ -261,7 +263,8 @@ unset($_SESSION['flash_message']);
                             $filterQuery = [];
                             if (!empty($_GET['department_filter'])) $filterQuery['department_filter'] = $_GET['department_filter'];
                             if (!empty($_GET['type_filter'])) $filterQuery['type_filter'] = $_GET['type_filter'];
-                            if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                            if (!empty($_GET['condition_filter'])) $filterQuery['condition_filter'] = $_GET['condition_filter'];
+                            if (!empty($_GET['contract_filter'])) $filterQuery['contract_filter'] = $_GET['contract_filter'];
                             if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                             $pdfUrl = '/personal/export-pdf' . (!empty($filterQuery) ? '?' . http_build_query($filterQuery) : '');
                         ?>
@@ -307,7 +310,7 @@ unset($_SESSION['flash_message']);
                             </div>
                             
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full">
         
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
@@ -337,12 +340,29 @@ unset($_SESSION['flash_message']);
 
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-blac tracking-wider pointer-events-none z-10">
-                                        Estatus
+                                        Condicion
                                     </label>
-                                    <select name="status_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
-                                        <option value="">Todos los Estatus</option>
-                                        <option value="activo" <?php echo (($_GET['status_filter'] ?? '') === 'activo') ? 'selected' : ''; ?>>Activo</option>
-                                        <option value="inactivo" <?php echo (($_GET['status_filter'] ?? '') === 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
+                                    <select name="condition_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todas las Condiciones</option>
+                                        <?php foreach ($conditions as $cond): ?>
+                                            <option value="<?php echo htmlspecialchars($cond['id_condition']); ?>" <?php echo (($_GET['condition_filter'] ?? '') == $cond['id_condition']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($cond['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="relative">
+                                    <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-blac tracking-wider pointer-events-none z-10">
+                                        Tipo Contrato
+                                    </label>
+                                    <select name="contract_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todos los Contratos</option>
+                                        <?php foreach ($contractTypes as $ct): ?>
+                                            <option value="<?php echo htmlspecialchars($ct['id_contract']); ?>" <?php echo (($_GET['contract_filter'] ?? '') == $ct['id_contract']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($ct['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 
@@ -353,24 +373,25 @@ unset($_SESSION['flash_message']);
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr class="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <th scope="col" class="px-6 py-3 text-left">Cédula</th>
+                                        <th scope="col" class="px-6 py-3 text-left">Cedula</th>
                                         <th scope="col" class="px-6 py-3 text-left">Personal</th>
                                         <th scope="col" class="px-6 py-3 text-left">Tipo / Departamento</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Condicion</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Tipo Contrato</th>
                                         <th scope="col" class="px-6 py-3 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($staffList) && !empty($_GET['department_filter'] ?? $_GET['type_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? '')): ?>
+                                    <?php if (empty($staffList) && !empty($_GET['department_filter'] ?? $_GET['type_filter'] ?? $_GET['condition_filter'] ?? $_GET['contract_filter'] ?? $_GET['search'] ?? '')): ?>
                                         <tr>
-                                            <td colspan="5" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <td colspan="6" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
                                                 No se encontraron resultados con los filtros aplicados.
                                             </td>
                                         </tr>
                                     <?php elseif (empty($staffList)): ?>
                                         <tr>
-                                            <td colspan="5" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <td colspan="6" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-user-circle-minus text-5xl mb-3 block opacity-50"></i>
                                                 No hay personal registrado en la base de datos. <br>
                                                 Usa el botón "Registrar Personal" para comenzar.
@@ -410,21 +431,33 @@ unset($_SESSION['flash_message']);
 
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-gray-900">
-                                                        <?php echo htmlspecialchars($person['pas'].' - '. $person['type_staff']); ?>
+                                                        <?php echo htmlspecialchars($person['pas']); ?>
                                                     </div>
                                                     <div class="text-sm text-gray-500">
-                                                        <?php echo htmlspecialchars($person['name'] ?? 'Sin Asignar'); ?>
+                                                        <?php echo htmlspecialchars($person['department_name'] ?? 'Sin Asignar'); ?>
                                                     </div>
                                                 </td>
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                    <?php if ($person['status'] === 'activo'): ?>
-                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
-                                                            Activo
+                                                    <?php if (!empty($person['condition_name'])): ?>
+                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                                                            <?php echo htmlspecialchars($person['condition_name']); ?>
                                                         </span>
                                                     <?php else: ?>
-                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
-                                                            Inactivo
+                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-200">
+                                                            Sin condicion
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                    <?php if (!empty($person['contract_name'])): ?>
+                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                                                            <?php echo htmlspecialchars($person['contract_name']); ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-200">
+                                                            Sin contrato
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
@@ -437,15 +470,6 @@ unset($_SESSION['flash_message']);
                                                         <button class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
                                                             <i class="ph ph-pencil-simple text-xl"></i>
                                                         </button>
-                                                        <?php if ($person['status'] === 'activo'): ?>
-                                                            <button onclick="openToggleStatus(<?= $person['id_staff'] ?>, '<?= htmlspecialchars($person['last_name'] . ', ' . $person['first_name'], ENT_QUOTES) ?>', 'activo')" class="text-slate-400 hover:text-red-600 transition-colors p-1" title="Inactivar">
-                                                                <i class="ph ph-prohibit text-xl"></i>
-                                                            </button>
-                                                        <?php else: ?>
-                                                            <button onclick="openToggleStatus(<?= $person['id_staff'] ?>, '<?= htmlspecialchars($person['last_name'] . ', ' . $person['first_name'], ENT_QUOTES) ?>', 'inactivo')" class="text-slate-400 hover:text-green-600 transition-colors p-1" title="Reactivar">
-                                                                <i class="ph ph-check-circle text-xl"></i>
-                                                            </button>
-                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
 
@@ -461,7 +485,8 @@ unset($_SESSION['flash_message']);
                                 $filterQuery = [];
                                 if (!empty($_GET['department_filter'])) $filterQuery['department_filter'] = $_GET['department_filter'];
                                 if (!empty($_GET['type_filter'])) $filterQuery['type_filter'] = $_GET['type_filter'];
-                                if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                                if (!empty($_GET['condition_filter'])) $filterQuery['condition_filter'] = $_GET['condition_filter'];
+                                if (!empty($_GET['contract_filter'])) $filterQuery['contract_filter'] = $_GET['contract_filter'];
                                 if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                                 $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';
                             ?>
@@ -605,37 +630,6 @@ unset($_SESSION['flash_message']);
             </div>
         </div>
     </div>
-
-    <div id="modalToggleStatus" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform modal-content">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
-                <h3 class="text-lg font-bold flex items-center gap-2">
-                    <i class="ph ph-warning-circle text-amber-500 text-xl"></i>
-                    Cambiar Estado
-                </h3>
-                <button onclick="toggleModal('modalToggleStatus')" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <i class="ph ph-x text-xl"></i>
-                </button>
-            </div>
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center" id="modalToggleIconWrap">
-                    <i class="ph ph-prohibit text-3xl text-amber-600" id="modalToggleIcon"></i>
-                </div>
-                <p class="text-gray-700 text-sm mb-1">¿Estás seguro de que deseas</p>
-                <p class="text-gray-900 font-bold text-lg" id="modalToggleAction">inactivar</p>
-                <p class="text-gray-700 text-sm mt-1">a <span class="font-semibold" id="modalToggleName">---</span>?</p>
-                <p class="text-xs text-gray-500 mt-3">Su estado actual pasará de <span class="font-medium" id="modalToggleFrom">activo</span> a <span class="font-medium" id="modalToggleTo">inactivo</span>.</p>
-            </div>
-            <form method="POST" action="/personal/toggle-status" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
-                <input type="hidden" name="id_staff" id="modalToggleId" value="">
-                <button type="button" onclick="toggleModal('modalToggleStatus')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2" id="modalToggleConfirmBtn">
-                    <i class="ph ph-check-circle text-lg"></i>
-                    Sí, cambiar estado
-                </button>
-            </form>
-        </div>
-    </div>
     
     <script>
         // Lógica del Menú Móvil
@@ -683,35 +677,6 @@ unset($_SESSION['flash_message']);
                     modal.classList.remove('flex');
                 }, 150);
             }
-        }
-
-        function openToggleStatus(id, name, status) {
-            const isActive = status === 'activo';
-            const actionText = isActive ? 'inactivar' : 'reactivar';
-            const fromText = isActive ? 'activo' : 'inactivo';
-            const toText = isActive ? 'inactivo' : 'activo';
-
-            document.getElementById('modalToggleId').value = id;
-            document.getElementById('modalToggleName').textContent = name;
-            document.getElementById('modalToggleAction').textContent = actionText;
-            document.getElementById('modalToggleFrom').textContent = fromText;
-            document.getElementById('modalToggleTo').textContent = toText;
-
-            const icon = document.getElementById('modalToggleIcon');
-            const iconWrap = document.getElementById('modalToggleIconWrap');
-            const confirmBtn = document.getElementById('modalToggleConfirmBtn');
-
-            if (isActive) {
-                icon.className = 'ph ph-prohibit text-3xl text-red-500';
-                iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center';
-                confirmBtn.className = 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2';
-            } else {
-                icon.className = 'ph ph-check-circle text-3xl text-green-600';
-                iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center';
-                confirmBtn.className = 'px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md w-full sm:w-auto flex items-center justify-center gap-2';
-            }
-
-            toggleModal('modalToggleStatus');
         }
 
         // =========================================================

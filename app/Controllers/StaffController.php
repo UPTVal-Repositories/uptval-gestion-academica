@@ -5,64 +5,13 @@ namespace Controllers;
 use Core\Session;
 use Models\Staff;
 use Models\Department;
+use Models\TypeCondition;
+use Models\ContractType;
 use Dompdf\Dompdf;
 
 class StaffController{
 
-/*
-    public function index(){
-
-        if(!Session::has('id_user')){
-            header("Location: /login");
-            exit;
-        }
-
-        $cedula = Session::get('cedula');
-
-        $last_connection_raw = Session::get('last_connection');
-        $last_connection = '';
-
-        if (!empty($last_connection_raw)) {
-            $last_connection = date('d/m/Y - h:i a', strtotime($last_connection_raw));
-        }
-        
-        $staffList = Staff::all();
-       
-        if(!empty($staffList) && isset($staffList['id_staff'])){
-            $staffList = [$staffList];
-        }
-
-        $limit = 10;
-        // 2. Capturar la página actual desde la URL (ej. ?page=2). Si no existe, es la 1.
-        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-        if ($page < 1) {
-            $page = 1;
-        }
-
-        $offset = ($page - 1) * $limit;
-
-        $totalRecords = Staff::countAll();
-        $totalPages = ceil($totalRecords / $limit); // Redondea hacia arriba
-
-        // 5. Evitar que el usuario ponga una página que no existe en la URL
-        if ($page > $totalPages && $totalPages > 0) {
-            $page = $totalPages;
-            $offset = ($page - 1) * $limit;
-        }
-
-        $staffList = Staff::paginate($limit, $offset);
-
-        $departamentos = \Models\Department::all();
-
-        /*echo "<pre style='background: #111; color: #0f0; padding: 20px; z-index: 9999; position: relative;'>";
-            print_r($totalRecords);
-        echo "</pre>";
-        die();*//*
-
-        require_once __DIR__ . '/../View/staff/index.php';
-    }*/
-
-        public function index() {
+    public function index() {
 
         if(!Session::has('id_user')){
             header("Location: /login");
@@ -77,7 +26,8 @@ class StaffController{
         $filters = [
             'id_department' => $_GET['department_filter'] ?? null,
             'type_staff'    => $_GET['type_filter'] ?? null,
-            'status'        => $_GET['status_filter'] ?? null,
+            'id_condition'  => $_GET['condition_filter'] ?? null,
+            'id_contract'   => $_GET['contract_filter'] ?? null,
             'search'        => $_GET['search'] ?? null
         ];
 
@@ -96,33 +46,17 @@ class StaffController{
             $offset = ($page - 1) * $limit;
         }
 
-        // 4. Llamar al nuevo método filter que creamos en el modelo
+        // 4. Llamar al modelo con filtros
         $staffList = Staff::filter($filters, $limit, $offset);
 
-        $departamentos = \Models\Department::all();
+        $departamentos = Department::all();
+        $conditions = TypeCondition::all();
+        $contractTypes = ContractType::all();
         $statsByType = Staff::getStatsByType($filters['id_department']);
 
         $userRoles = Session::get('user_roles') ?? [];
 
         require_once __DIR__ . '/../View/staff/index.php';
-    }
-
-    public function toggleStatus() {
-        if (!Session::has('id_user')) {
-            header("Location: /login");
-            exit;
-        }
-
-        $idStaff = $_POST['id_staff'] ?? null;
-
-        if ($idStaff && Staff::toggleStatus($idStaff)) {
-            $newStatus = Staff::getStatus($idStaff);
-            $msg = $newStatus === 'activo' ? 'Personal activado correctamente.' : 'Personal inactivado correctamente.';
-            $_SESSION['flash_message'] = ['type' => 'success', 'title' => '¡Cambio de estado exitoso!', 'message' => $msg];
-        }
-
-        header("Location: /personal");
-        exit;
     }
 
     public function exportPdf() {
@@ -136,7 +70,8 @@ class StaffController{
         $filters = [
             'id_department' => $_GET['department_filter'] ?? null,
             'type_staff'    => $_GET['type_filter'] ?? null,
-            'status'        => $_GET['status_filter'] ?? null,
+            'id_condition'  => $_GET['condition_filter'] ?? null,
+            'id_contract'   => $_GET['contract_filter'] ?? null,
             'search'        => $_GET['search'] ?? null
         ];
 
@@ -181,7 +116,7 @@ class StaffController{
             if ($index === 0) {
                 $html .= '<div class="header">
                     <h1><span>UPT</span>Val</h1>
-                    <p>Universidad Politécnica Territorial de Valencia</p>
+                    <p>Universidad Politecnica Territorial de Valencia</p>
                 </div>
                 <div class="meta">
                     <span><strong>Generado por:</strong> ' . $generatedBy . '</span>
@@ -193,25 +128,30 @@ class StaffController{
             $html .= '<table>
                 <thead>
                     <tr>
-                        <th>Cédula</th>
+                        <th>Cedula</th>
                         <th>Nombre</th>
                         <th>Tipo</th>
                         <th>Departamento</th>
-                        <th>Estatus</th>
+                        <th>Condicion</th>
+                        <th>Tipo Contrato</th>
                     </tr>
                 </thead>
                 <tbody>';
 
             foreach ($chunk as $person) {
-                $statusBadge = $person['status'] === 'activo'
-                    ? '<span style="color:#16a34a;font-weight:600;">Activo</span>'
-                    : '<span style="color:#dc2626;font-weight:600;">Inactivo</span>';
+                $conditionBadge = !empty($person['condition_name'])
+                    ? htmlspecialchars($person['condition_name'])
+                    : 'Sin condicion';
+                $contractBadge = !empty($person['contract_name'])
+                    ? htmlspecialchars($person['contract_name'])
+                    : 'Sin contrato';
                 $html .= '<tr>
                     <td>' . htmlspecialchars($person['cedula']) . '</td>
                     <td>' . htmlspecialchars($person['last_name'] . ', ' . $person['first_name']) . '</td>
                     <td>' . htmlspecialchars($person['pas']) . '</td>
-                    <td>' . htmlspecialchars($person['name'] ?? 'Sin Asignar') . '</td>
-                    <td>' . $statusBadge . '</td>
+                    <td>' . htmlspecialchars($person['department_name'] ?? 'Sin Asignar') . '</td>
+                    <td>' . $conditionBadge . '</td>
+                    <td>' . $contractBadge . '</td>
                 </tr>';
             }
 
@@ -230,7 +170,7 @@ class StaffController{
         $fontMetrics = $dompdf->getFontMetrics();
         $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
         $canvas->page_script(function($pageNumber, $pageCount) use ($font, $fontMetrics, $canvas) {
-            $text = "Página $pageNumber de $pageCount";
+            $text = "Pagina $pageNumber de $pageCount";
             $textWidth = $fontMetrics->getTextWidth($text, $font, 8);
             $x = ($canvas->get_width() - $textWidth) / 2;
             $canvas->text($x, $canvas->get_height() - 20, $text, $font, 8);
