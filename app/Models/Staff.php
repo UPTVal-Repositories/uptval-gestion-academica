@@ -67,24 +67,28 @@ class Staff{
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public static function getStatsByType($departmentId = null) {
+    public static function getStatsByType($departmentId = null, $conditionId = null) {
         $db = Database::getInstance();
 
-        $sql = "SELECT
-                    s.pas,
-                    COUNT(s.id_staff) as total,
-                    SUM(CASE WHEN tc.status = 'activo' THEN 1 ELSE 0 END) as activos,
-                    SUM(CASE WHEN tc.status = 'inactivo' THEN 1 ELSE 0 END) as inactivos
-                FROM staff s
-                LEFT JOIN type_condition tc ON s.type_condition = tc.id_condition";
-
+        $conditions = [];
         $params = [];
+
         if (!empty($departmentId)) {
-            $sql .= " WHERE s.id_department = :dept";
+            $conditions[] = "s.id_department = :dept";
             $params[':dept'] = $departmentId;
         }
+        if (!empty($conditionId)) {
+            $conditions[] = "s.type_condition = :condition";
+            $params[':condition'] = $conditionId;
+        }
 
-        $sql .= " GROUP BY s.pas ORDER BY s.pas ASC";
+        $whereClause = !empty($conditions) ? 'AND ' . implode(' AND ', $conditions) : '';
+
+        $sql = "SELECT types.pas, COUNT(s.id_staff) as total
+                FROM (SELECT 'Docente' as pas UNION SELECT 'Administrativo' UNION SELECT 'Obrero') as types
+                LEFT JOIN staff s ON s.pas = types.pas {$whereClause}
+                GROUP BY types.pas
+                ORDER BY types.pas ASC";
 
         $stmt = $db->prepare($sql);
         foreach ($params as $key => $val) {

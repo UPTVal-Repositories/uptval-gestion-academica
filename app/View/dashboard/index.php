@@ -305,39 +305,46 @@
                             <div class="flex justify-between items-center mb-6">
                                 <div>
                                     <h3 class="text-lg font-bold text-slate-900">Estado del Personal</h3>
-                                    <p class="text-sm text-slate-500">Proporción de personal activo vs inactivo.</p>
+                                    <p class="text-sm text-slate-500">Distribución total por tipo de personal.</p>
                                 </div>
                                 <div class="p-2 bg-orange-50 text-orange-500 rounded-lg"><i class="ph ph-users text-xl"></i></div>
                             </div>
                             
+                            <?php
+                            $typeColors = [
+                                'Docente'        => ['hex' => '#3b82f6', 'bg' => 'bg-blue-500'],
+                                'Administrativo' => ['hex' => '#f97316', 'bg' => 'bg-orange-500'],
+                                'Obrero'         => ['hex' => '#10b981', 'bg' => 'bg-emerald-500'],
+                            ];
+                            $totalStaff = array_sum(array_column($statsByType, 'total'));
+                            $runningPercent = 0;
+                            ?>
+
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
-                                    
-                                    <?php 
-                                        // Cálculo de porcentajes para el dibujo SVG (evita división por cero)
-                                        $porcentaje_activos = ($total_staff > 0) ? round(($activos_staff / $total_staff) * 100) : 0;
-                                        $porcentaje_inactivos = 100 - $porcentaje_activos;
-                                    ?>
-                                    
                                     <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
-                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#fee2e2" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="<?= $porcentaje_activos ?> <?= $porcentaje_inactivos ?>" stroke-linecap="round"></circle>
+                                        <?php foreach ($statsByType as $type): 
+                                            $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100, 1) : 0;
+                                            $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280'];
+                                        ?>
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="<?= $color['hex'] ?>" stroke-width="5" stroke-dasharray="<?= $percent ?> <?= 100 - $percent ?>" stroke-dashoffset="-<?= $runningPercent ?>" class="transition-all duration-1000 ease-out"></circle>
+                                        <?php $runningPercent += $percent; endforeach; ?>
                                     </svg>
-                                    
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span class="text-2xl font-bold text-slate-800"><?= $total_staff ?></span>
+                                        <span class="text-2xl font-bold text-slate-800"><?= $totalStaff ?></span>
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <?php foreach ($statsByType as $type): 
+                                        $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100) : 0;
+                                        $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280', 'bg' => 'bg-gray-500'];
+                                    ?>
                                     <div class="flex items-center justify-between gap-6">
-                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-orange-500"></div><span class="text-sm font-medium text-slate-600">Activos</span></div>
-                                        <span class="text-base font-bold text-slate-900"><?= $activos_staff ?></span>
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full <?= $color['bg'] ?>"></div><span class="text-sm font-medium text-slate-600"><?= htmlspecialchars($type['pas']) ?>s (<?= $percent ?>%)</span></div>
+                                        <span class="text-base font-bold text-slate-900"><?= $type['total'] ?></span>
                                     </div>
-                                    <div class="flex items-center justify-between gap-6">
-                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-200"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
-                                        <span class="text-base font-bold text-slate-900"><?= $inactivos_staff ?></span>
-                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>

@@ -24,6 +24,7 @@ class DashboardController {
         $last_connection = '';
 
         $staffStats = Staff::getDashboardStats();
+        $statsByType = Staff::getStatsByType();
 
         
         $total_staff     = $staffStats['total'] ?? 0;

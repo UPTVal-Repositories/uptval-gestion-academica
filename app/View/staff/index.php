@@ -574,10 +574,6 @@ unset($_SESSION['flash_message']);
                                         </span>
                                         <span class="font-extrabold text-slate-900 text-lg"><?= $type['total'] ?></span>
                                     </div>
-                                    <div class="flex gap-3 text-[11px] sm:text-xs font-medium pl-5">
-                                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-check-circle"></i> <?= $type['activos'] ?> Activos</span>
-                                        <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><i class="ph ph-prohibit"></i> <?= $type['inactivos'] ?> Inactivos</span>
-                                    </div>
                                 </div>
                                 <?php endforeach; ?>
 

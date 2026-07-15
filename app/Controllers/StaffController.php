@@ -52,7 +52,7 @@ class StaffController{
         $departamentos = Department::all();
         $conditions = TypeCondition::all();
         $contractTypes = ContractType::all();
-        $statsByType = Staff::getStatsByType($filters['id_department']);
+        $statsByType = Staff::getStatsByType($filters['id_department'], $filters['id_condition']);
 
         $userRoles = Session::get('user_roles') ?? [];
 
