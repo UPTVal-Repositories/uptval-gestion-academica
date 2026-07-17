@@ -2,6 +2,10 @@
 /**
  * @var string $cedula
  * @var string $last_connection
+ * @var string $total_staff
+ * @var string $activos_staff
+ * @var string $inactivos_staff
+ * @var array $userRoles
  */
 ?>
 
@@ -12,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Dashboard - UPTVal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -35,33 +40,34 @@
             -webkit-backdrop-filter: blur(16px);
         }
         
-        /* Scrollbar personalizado */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b; 
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #334155; 
-        }
+        /* Scrollbar personalizado general */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-        /* Transición suave para el menú móvil */
+        /* Menú móvil */
         .mobile-menu {
             transition: transform 0.3s ease-in-out;
             transform: translateX(-100%);
         }
-        .mobile-menu.open {
-            transform: translateX(0);
-        }
+        .mobile-menu.open { transform: translateX(0); }
+        body.menu-open { overflow: hidden; }
 
-        /* Evitar scroll en body cuando el menú está abierto en móvil */
-        body.menu-open {
-            overflow: hidden;
+        /* Animación para los gráficos del Dashboard */
+        @keyframes drawCircle {
+            from { stroke-dasharray: 0 100; }
+        }
+        .chart-circle {
+            animation: drawCircle 1.5s ease-out forwards;
+        }
+        /* Ocultar barra de scroll específicamente para el carrusel */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
@@ -69,7 +75,6 @@
 
     <nav class="glass-panel border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50 shrink-0">
         <div class="flex items-center gap-2">
-            <!-- Botón menú hamburguesa (solo móvil) -->
             <button id="menuToggle" class="md:hidden text-gray-300 hover:text-white focus:outline-none mr-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -85,7 +90,7 @@
         <div class="flex items-center gap-2 sm:gap-4">
             <div class="text-right hidden sm:block">
                 <p class="text-sm font-medium text-gray-300">Usuario Activo</p>
-                <p class="text-xs text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula); ?></p>
+                <p class="text-xs text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula ?? ''); ?></p>
                 <?php if (!empty($last_connection)): ?>
                     <p class="text-[11px] text-gray-500 mt-1">Última conexión: <?php echo htmlspecialchars($last_connection); ?></p>
                 <?php endif; ?>
@@ -104,175 +109,402 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <!-- Blur decorativo -->
-        <div class="absolute top-[-10%] left-[20%] w-96 h-96 bg-uptval-orange rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
+        <div class="absolute top-[-10%] left-[20%] w-96 h-96 bg-uptval-orange rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none z-0"></div>
 
-        <!-- Sidebar Desktop (visible en md+) -->
         <aside class="w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 shrink-0 overflow-y-auto hidden md:flex relative z-10">
-            
             <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Menú Principal</p>
             
             <nav class="space-y-1.5 flex-1">
                 <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
-
+                <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    <span class="font-medium text-sm">Cuerpo Docente/Administrativo</span>
+                <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-users text-xl"></i>
+                    <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
-
+                <?php endif; ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    <i class="ph ph-student text-xl"></i>
+                    <span class="font-medium text-sm">Estudiantes</span>
+                </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
+                <?php endif; ?>
             </nav>
 
+            <?php if (in_array('Administrador', $userRoles)): ?>
             <div class="mt-8">
                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <i class="ph ph-gear text-xl"></i>
                     <span class="font-medium text-sm">Configuración</span>
                 </a>
             </div>
+            <?php endif; ?>
         </aside>
 
-        <!-- Sidebar Móvil (overlay deslizable) -->
         <div id="mobileSidebar" class="mobile-menu fixed top-0 left-0 h-full w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 z-50 md:hidden shadow-2xl">
             <div class="flex justify-between items-center mb-6 px-4">
                 <h2 class="text-lg font-bold text-white">Menú</h2>
                 <button id="closeMenu" class="text-gray-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <i class="ph ph-x text-2xl"></i>
                 </button>
             </div>
             
             <nav class="space-y-1.5 flex-1">
-                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
+                    <i class="ph ph-squares-four text-xl"></i>
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <span class="font-medium text-sm">Gestión de Estudiantes</span>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-buildings text-xl"></i>
+                    <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    <span class="font-medium text-sm">Cuerpo Docente</span>
+                <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-users text-xl"></i>
+                    <span class="font-medium text-sm">Gestión de Personal</span>
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                <?php endif; ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-student text-xl"></i>
+                    <span class="font-medium text-sm">Estudiantes</span>
+                </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
-                
                 <div class="pt-6 mt-6 border-t border-gray-800">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                        <i class="ph ph-gear text-xl"></i>
                         <span class="font-medium text-sm">Configuración</span>
                     </a>
                 </div>
+                <?php endif; ?>
             </nav>
             
-            <!-- Sección de usuario en móvil - AHORA CON ICONO Y "USUARIO ACTIVO" ARRIBA -->
             <div class="mt-auto pt-4 border-t border-gray-800">
                 <div class="flex items-center gap-3 px-4 py-3">
-                    <!-- Ícono de usuario -->
                     <div class="w-10 h-10 rounded-full bg-uptval-orange/20 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-uptval-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <i class="ph ph-user text-xl text-uptval-orange"></i>
                     </div>
                     <div class="flex-1">
                         <p class="text-xs text-gray-400">Usuario Activo</p>
-                        <p class="text-sm text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula); ?></p>
-                        <p class="text-[11px] text-gray-500 mt-1">Última conexión: <?php echo htmlspecialchars($last_connection); ?></p>
+                        <p class="text-sm text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula ?? ''); ?></p>
+                        <?php if (!empty($last_connection)): ?>
+                            <p class="text-[11px] text-gray-500 mt-1">Última conexión: <?php echo htmlspecialchars($last_connection); ?></p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Overlay para cerrar menú móvil -->
         <div id="menuOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
 
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 relative z-10">
-            <header class="mb-6 sm:mb-10">
-                <h2 class="text-2xl sm:text-3xl font-light text-gray-200">Panel de Control</h2>
-                <p class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">Visión general del sistema académico.</p>
+        <main class="flex-1 overflow-y-auto bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-10 relative z-10">
+            
+            <header class="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Panel Analítico</h2>
+                    <p class="text-slate-500 text-sm sm:text-base mt-1 sm:mt-2">Resumen estadístico y estado general del sistema.</p>
+                </div>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto">
+                    <i class="ph ph-download-simple text-lg"></i>
+                    Exportar Reporte
+                </button>
+                <?php endif; ?>
             </header>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
-                <div class="bg-slate-900/50 border border-gray-800 p-4 sm:p-6 rounded-2xl">
+            <?php if (in_array('Administrador', $userRoles)): ?>
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                
+                <a href="/personal" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Estudiantes</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-white">1,248</h3>
+                            <p class="text-sm text-slate-500 font-medium">Total Personal</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1"><?= $total_staff ?? 0 ?></h3>
                         </div>
-                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <div class="p-3 bg-orange-100 text-orange-600 rounded-xl">
+                            <i class="ph ph-users text-2xl"></i>
                         </div>
+                    </div>
+                </a>
+
+                <a href="/estudiantes" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
+                        </div>
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                            <i class="ph ph-student text-2xl"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/departamentos" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Departamentos</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">5</h3>
+                        </div>
+                        <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
+                            <i class="ph ph-buildings text-2xl"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/asistencia" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-green-300 transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Asistencia Promedio</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">92%</h3>
+                        </div>
+                        <div class="p-3 bg-green-100 text-green-600 rounded-xl">
+                            <i class="ph ph-calendar-check text-2xl"></i>
+                        </div>
+                    </div>
+                </a>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Desglose Analítico</h2>
+                        <p class="text-sm text-slate-500">Desliza para ver más métricas del sistema.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btnPrev" class="p-2.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-orange-500 shadow-sm transition-colors focus:outline-none">
+                            <i class="ph ph-caret-left text-lg"></i>
+                        </button>
+                        <button id="btnNext" class="p-2.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-orange-500 shadow-sm transition-colors focus:outline-none">
+                            <i class="ph ph-caret-right text-lg"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="bg-slate-900/50 border border-gray-800 p-4 sm:p-6 rounded-2xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Personal Docente</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-white">84</h3>
-                        </div>
-                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-500">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-slate-900/50 border border-gray-800 p-4 sm:p-6 rounded-2xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Índice de Asistencia</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-white">92%</h3>
-                        </div>
-                        <div class="p-2 bg-green-500/10 rounded-lg text-green-500">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Cuarta tarjeta para mejor distribución -->
-                <div class="bg-slate-900/50 border border-gray-800 p-4 sm:p-6 rounded-2xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Tasa de Éxito</p>
-                            <h3 class="text-2xl sm:text-3xl font-bold text-white">88%</h3>
-                        </div>
-                        <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <div id="chartCarousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4 scroll-smooth">
+                    
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Estado del Personal</h3>
+                                    <p class="text-sm text-slate-500">Distribución total por tipo de personal.</p>
+                                </div>
+                                <div class="p-2 bg-orange-50 text-orange-500 rounded-lg"><i class="ph ph-users text-xl"></i></div>
+                            </div>
+                            
+                            <?php
+                            $typeColors = [
+                                'Docente'        => ['hex' => '#3b82f6', 'bg' => 'bg-blue-500'],
+                                'Administrativo' => ['hex' => '#f97316', 'bg' => 'bg-orange-500'],
+                                'Obrero'         => ['hex' => '#10b981', 'bg' => 'bg-emerald-500'],
+                            ];
+                            $totalStaff = array_sum(array_column($statsByType, 'total'));
+                            $runningPercent = 0;
+                            ?>
 
-            <div class="bg-slate-900/50 border border-gray-800 rounded-2xl p-4 sm:p-6">
-                <h3 class="text-base sm:text-lg font-medium text-white mb-4 border-b border-gray-800 pb-4">Actividad Reciente</h3>
-                <div class="text-sm text-gray-400 py-6 sm:py-8 text-center border-2 border-dashed border-gray-800 rounded-xl">
-                    Seleccione una opción del menú lateral para cargar un módulo.
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <?php foreach ($statsByType as $type): 
+                                            $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100, 1) : 0;
+                                            $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280'];
+                                        ?>
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="<?= $color['hex'] ?>" stroke-width="5" stroke-dasharray="<?= $percent ?> <?= 100 - $percent ?>" stroke-dashoffset="-<?= $runningPercent ?>" class="transition-all duration-1000 ease-out"></circle>
+                                        <?php $runningPercent += $percent; endforeach; ?>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800"><?= $totalStaff ?></span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <?php foreach ($statsByType as $type): 
+                                        $percent = $totalStaff > 0 ? round($type['total'] / $totalStaff * 100) : 0;
+                                        $color = $typeColors[$type['pas']] ?? ['hex' => '#6b7280', 'bg' => 'bg-gray-500'];
+                                    ?>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full <?= $color['bg'] ?>"></div><span class="text-sm font-medium text-slate-600"><?= htmlspecialchars($type['pas']) ?>s (<?= $percent ?>%)</span></div>
+                                        <span class="text-base font-bold text-slate-900"><?= $type['total'] ?></span>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/personal" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Personal <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Estado Estudiantil</h3>
+                                    <p class="text-sm text-slate-500">Alumnos regulares frente a inactivos.</p>
+                                </div>
+                                <div class="p-2 bg-blue-50 text-blue-500 rounded-lg"><i class="ph ph-student text-xl"></i></div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
+                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
+                                        <span class="text-base font-bold text-slate-900">188</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/estudiantes" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Estudiantes <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="snap-center shrink-0 w-full lg:w-[calc(50%-0.75rem)] bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Reporte de Asistencia</h3>
+                                    <p class="text-sm text-slate-500">Cumplimiento del periodo actual.</p>
+                                </div>
+                                <div class="p-2 bg-green-50 text-green-500 rounded-lg"><i class="ph ph-calendar-check text-xl"></i></div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#dcfce7" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#22c55e" stroke-width="5" stroke-dasharray="92 8" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">92%</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Promedio</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-slate-600">Presentes</span></div>
+                                        <span class="text-base font-bold text-slate-900">+1.2k</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-200"></div><span class="text-sm font-medium text-slate-600">Ausencias</span></div>
+                                        <span class="text-base font-bold text-slate-900">84</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/asistencia" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-green-600 hover:text-green-700 hover:bg-green-50/50 transition-colors rounded-b-2xl">
+                                Ir a Control de Asistencia <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
+            </section>
+            <?php endif; ?>
+
+            <?php if (in_array('Control de Estudio', $userRoles)): ?>
+            <section class="mb-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="/estudiantes" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group relative overflow-hidden sm:col-span-2 lg:col-span-1">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
+                                <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
+                            </div>
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                                <i class="ph ph-student text-2xl"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Estado Estudiantil</h2>
+                        <p class="text-sm text-slate-500">Alumnos regulares frente a inactivos.</p>
+                    </div>
+                </div>
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
+                        <div class="p-6 pb-2">
+                            <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
+                                <div class="relative w-36 h-36 flex-shrink-0">
+                                    <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                                        <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 w-full xl:w-auto">
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
+                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
+                                        <span class="text-base font-bold text-slate-900">188</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                            <a href="/estudiantes" class="w-full py-4 px-6 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 transition-colors rounded-b-2xl">
+                                Ir a Gestión de Estudiantes <i class="ph ph-arrow-right font-bold"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <?php endif; ?>
 
         </main>
     </div>
 
     <script>
-        // Menú móvil
+        // Lógica de Sidebar Móvil
         const menuToggle = document.getElementById('menuToggle');
         const mobileSidebar = document.getElementById('mobileSidebar');
         const closeMenu = document.getElementById('closeMenu');
@@ -291,25 +523,33 @@
             body.classList.remove('menu-open');
         }
 
-        if (menuToggle) {
-            menuToggle.addEventListener('click', openMenu);
-        }
-        
-        if (closeMenu) {
-            closeMenu.addEventListener('click', closeMenuFunc);
-        }
-        
-        if (menuOverlay) {
-            menuOverlay.addEventListener('click', closeMenuFunc);
-        }
+        if (menuToggle) menuToggle.addEventListener('click', openMenu);
+        if (closeMenu) closeMenu.addEventListener('click', closeMenuFunc);
+        if (menuOverlay) menuOverlay.addEventListener('click', closeMenuFunc);
 
-        // Cerrar menú al redimensionar a desktop
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 768) {
                 closeMenuFunc();
             }
         });
-    </script>
 
+        // Lógica del Carrusel de Estadísticas
+        const carousel = document.getElementById('chartCarousel');
+        const btnNext = document.getElementById('btnNext');
+        const btnPrev = document.getElementById('btnPrev');
+
+        if(carousel && btnNext && btnPrev) {
+            // Desplazamiento dinámico según el tamaño de la pantalla
+            const scrollAmount = () => carousel.offsetWidth / (window.innerWidth >= 1024 ? 2 : 1);
+
+            btnNext.addEventListener('click', () => {
+                carousel.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+            });
+
+            btnPrev.addEventListener('click', () => {
+                carousel.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+            });
+        }
+    </script>
 </body>
 </html>
