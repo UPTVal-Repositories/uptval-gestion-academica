@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Core\Session;
+use Models\Staff;
 
 class DashboardController {
 
@@ -21,6 +22,17 @@ class DashboardController {
 
         $last_connection_raw = Session::get('last_connection');
         $last_connection = '';
+
+        $staffStats = Staff::getDashboardStats();
+        $statsByType = Staff::getStatsByType();
+
+        
+        $total_staff     = $staffStats['total'] ?? 0;
+        $activos_staff   = $staffStats['activos'] ?? 0;
+        $inactivos_staff = $staffStats['inactivos'] ?? 0;
+
+        $userRoles = Session::get('user_roles') ?? [];
+
 
         if (!empty($last_connection_raw)) {
             $last_connection = date('d/m/Y - h:i a', strtotime($last_connection_raw));
