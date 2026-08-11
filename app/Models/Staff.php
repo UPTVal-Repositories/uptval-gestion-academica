@@ -7,6 +7,8 @@ class Staff{
 
     private static $baseSelect = "SELECT 
                 s.id_staff,
+                u.id_user,
+                u.status,
                 s.first_name,
                 s.last_name,
                 s.sex,
@@ -42,6 +44,15 @@ class Staff{
         $query = self::$baseSelect . " WHERE s.id_staff = :id LIMIT 1";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public static function findByCedula($cedula){
+        $db = Database::getInstance();
+        $query = self::$baseSelect . " WHERE u.cedula = :cedula LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':cedula', $cedula);
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }

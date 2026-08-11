@@ -42,6 +42,12 @@ $router->post('logout', 'AuthController', 'logout');
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal/export-pdf-one', 'StaffController', 'exportPdfOne');
 $router->get('personal', 'StaffController', 'index');
+$router->get('personal/permisos-roles', 'RoleController', 'index');
+$router->post('personal/permisos-roles/store', 'RoleController', 'store');
+$router->post('personal/permisos-roles/deactivate', 'RoleController', 'deactivate');
+$router->post('personal/permisos-roles/reactivate', 'RoleController', 'reactivate');
+$router->get('personal/permisos-roles/search-by-cedula', 'RoleController', 'searchByCedula');
+$router->get('personal/permisos-roles/export-pdf', 'RoleController', 'exportPdf');
 $router->post('personal/store', 'StaffController', 'store');
 $router->post('personal/update', 'StaffController', 'update');
 
