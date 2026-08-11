@@ -41,6 +41,7 @@ $router->post('logout', 'AuthController', 'logout');
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal', 'StaffController', 'index');
+$router->post('personal/store', 'StaffController', 'store');
 
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];

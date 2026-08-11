@@ -59,6 +59,102 @@ class StaffController{
         require_once __DIR__ . '/../View/staff/index.php';
     }
 
+    public function store() {
+
+        if (!Session::has('id_user')) {
+            header("Location: /login");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: /personal");
+            exit;
+        }
+
+        $data = [
+            'cedula'         => trim($_POST['cedula'] ?? ''),
+            'first_name'     => trim($_POST['first_name'] ?? ''),
+            'last_name'      => trim($_POST['last_name'] ?? ''),
+            'sex'            => $_POST['sex'] ?? '',
+            'phone'          => trim($_POST['phone'] ?? ''),
+            'email'          => trim($_POST['email'] ?? ''),
+            'type_staff'     => $_POST['type_staff'] ?? '',
+            'type_condition' => $_POST['type_condition'] ?? '',
+            'id_department'  => $_POST['id_department'] ?? '',
+            'pas'            => $_POST['pas'] ?? '',
+            'type_contract'  => $_POST['type_contract'] ?? ''
+        ];
+
+        $errors = [];
+        if ($data['cedula'] === '') {
+            $errors[] = 'La cédula es obligatoria.';
+        }
+        if ($data['first_name'] === '') {
+            $errors[] = 'El nombre es obligatorio.';
+        }
+        if ($data['last_name'] === '') {
+            $errors[] = 'El apellido es obligatorio.';
+        }
+        if (!in_array($data['sex'], ['M', 'F'], true)) {
+            $errors[] = 'Debe seleccionar el sexo.';
+        }
+        if ($data['email'] === '' || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Debe ingresar un correo válido.';
+        }
+        if (!in_array($data['type_staff'], ['Regular', 'Contratado'], true)) {
+            $errors[] = 'Debe seleccionar el tipo de nombramiento.';
+        }
+        if (!in_array($data['pas'], ['Docente', 'Administrativo', 'Obrero'], true)) {
+            $errors[] = 'Debe seleccionar el tipo de personal.';
+        }
+        if (!ctype_digit((string) $data['type_condition'])) {
+            $errors[] = 'Debe seleccionar la condición.';
+        }
+        if (!ctype_digit((string) $data['id_department'])) {
+            $errors[] = 'Debe seleccionar el departamento.';
+        }
+        if (!ctype_digit((string) $data['type_contract'])) {
+            $errors[] = 'Debe seleccionar el tipo de contrato.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['flash_message'] = [
+                'type'    => 'error',
+                'title'   => 'Error de validación',
+                'message' => implode(' ', $errors)
+            ];
+            header("Location: /personal");
+            exit;
+        }
+
+        try {
+            Staff::createWithUser($data);
+            $_SESSION['flash_message'] = [
+                'type'    => 'success',
+                'title'   => 'Personal registrado',
+                'message' => 'El personal se registró exitosamente en el sistema.'
+            ];
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23000') {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Registro duplicado',
+                    'message' => 'La cédula, el correo o el teléfono ya se encuentran registrados en el sistema.'
+                ];
+            } else {
+                error_log("Error registrando personal: " . $e->getMessage());
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Error al registrar',
+                    'message' => 'Ocurrió un error inesperado al guardar el personal.'
+                ];
+            }
+        }
+
+        header("Location: /personal");
+        exit;
+    }
+
     public function exportPdf() {
         if (!Session::has('id_user')) {
             header("Location: /login");

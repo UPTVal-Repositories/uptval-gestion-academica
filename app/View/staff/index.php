@@ -586,43 +586,98 @@ unset($_SESSION['flash_message']);
         </div>
 
     <div id="modalRegistrar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform modal-content" id="modalContent">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content" id="modalContent">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
                 <h3 class="text-lg font-bold">Registrar Nuevo Personal</h3>
                 <button onclick="toggleModal('modalRegistrar')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
             <div class="p-6">
-                <form class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-gray-800">
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                <form method="POST" action="/personal/store" class="text-gray-800">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                            <input type="text" name="cedula" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                            <input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                            <input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select name="sex" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                            <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-gray-400">(opcional)</span></label>
+                            <input type="text" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                            <select name="pas" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Docente">Docente</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Obrero">Obrero</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                            <select name="type_staff" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Contratado">Contratado</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select name="id_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                        <?php echo htmlspecialchars($depto['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                            <select name="type_condition" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($conditions as $cond): ?>
+                                    <option value="<?php echo htmlspecialchars($cond['id_condition']); ?>">
+                                        <?php echo htmlspecialchars($cond['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                            <select name="type_contract" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($contractTypes as $ct): ?>
+                                    <option value="<?php echo htmlspecialchars($ct['id_contract']); ?>">
+                                        <?php echo htmlspecialchars($ct['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
-                    </div>
-                    <div class="col-span-1 sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
-                        <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
-                            <option value="Docente">Docente</option>
-                            <option value="Administrativo">Administrativo</option>
-                        </select>
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
-                            <option value="1">Ingeniería en Informática</option>
-                        </select>
+                    <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                        <button type="button" onclick="toggleModal('modalRegistrar')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Registro</button>
                     </div>
                 </form>
-            </div>
-            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
-                <button onclick="toggleModal('modalRegistrar')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
-                <button class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Registro</button>
             </div>
         </div>
     </div>
