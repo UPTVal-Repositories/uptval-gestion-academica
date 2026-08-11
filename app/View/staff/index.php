@@ -464,7 +464,7 @@ unset($_SESSION['flash_message']);
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div class="flex items-center justify-end gap-2">
-                                                        <button class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Ver Detalles">
+                                                        <button onclick="viewStaff(<?= (int) $person['id_staff'] ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Ver Detalles">
                                                             <i class="ph ph-eye text-xl"></i>
                                                         </button>
                                                         <button class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
@@ -681,6 +681,69 @@ unset($_SESSION['flash_message']);
             </div>
         </div>
     </div>
+
+    <div id="modalVerPersonal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <h3 class="text-lg font-bold">Detalle del Personal</h3>
+                <button onclick="toggleModal('modalVerPersonal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-gray-800">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                        <input type="text" id="view_cedula" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                        <input type="text" id="view_first_name" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                        <input type="text" id="view_last_name" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                        <input type="text" id="view_sex" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                        <input type="text" id="view_email" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                        <input type="text" id="view_phone" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                        <input type="text" id="view_pas" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                        <input type="text" id="view_type_staff" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <input type="text" id="view_department" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                        <input type="text" id="view_condition" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                        <input type="text" id="view_contract" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                <a id="viewPdfButton" href="#" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md text-center">
+                    <i class="ph ph-file-pdf text-lg text-red-500 mr-1"></i> Descargar PDF
+                </a>
+                <button onclick="toggleModal('modalVerPersonal')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
     
     <script>
         // Lógica del Menú Móvil
@@ -728,6 +791,38 @@ unset($_SESSION['flash_message']);
                     modal.classList.remove('flex');
                 }, 150);
             }
+        }
+
+        // =========================================================
+        // LÓGICA DE VER PERSONAL (MODAL + PDF)
+        // =========================================================
+        const staffData = <?php echo json_encode($staffList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+        function viewStaff(id) {
+            const record = staffData.find(function(item) {
+                return parseInt(item.id_staff, 10) === parseInt(id, 10);
+            });
+
+            if (!record) {
+                showToast('error', 'Registro no encontrado', 'El personal solicitado no está en la página actual.');
+                return;
+            }
+
+            document.getElementById('view_cedula').value = record.cedula || '';
+            document.getElementById('view_first_name').value = record.first_name || '';
+            document.getElementById('view_last_name').value = record.last_name || '';
+            document.getElementById('view_sex').value = record.sex === 'M' ? 'Masculino' : (record.sex === 'F' ? 'Femenino' : record.sex || '');
+            document.getElementById('view_email').value = record.email || '';
+            document.getElementById('view_phone').value = record.phone || 'No registrado';
+            document.getElementById('view_pas').value = record.pas || '';
+            document.getElementById('view_type_staff').value = record.type_staff || '';
+            document.getElementById('view_department').value = record.department_name || 'Sin Asignar';
+            document.getElementById('view_condition').value = record.condition_name || 'Sin condicion';
+            document.getElementById('view_contract').value = record.contract_name || 'Sin contrato';
+
+            document.getElementById('viewPdfButton').href = '/personal/export-pdf-one?id=' + encodeURIComponent(record.id_staff);
+
+            toggleModal('modalVerPersonal');
         }
 
         // =========================================================

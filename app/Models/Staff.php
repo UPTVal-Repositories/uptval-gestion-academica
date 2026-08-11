@@ -36,6 +36,15 @@ class Staff{
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function findById($id){
+        $db = Database::getInstance();
+        $query = self::$baseSelect . " WHERE s.id_staff = :id LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
     public static function countAll() {
         $db = Database::getInstance();
         $query = "SELECT COUNT(s.id_staff) as total FROM staff s";
