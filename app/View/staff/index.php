@@ -467,7 +467,7 @@ unset($_SESSION['flash_message']);
                                                         <button onclick="viewStaff(<?= (int) $person['id_staff'] ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Ver Detalles">
                                                             <i class="ph ph-eye text-xl"></i>
                                                         </button>
-                                                        <button class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
+                                                        <button onclick="editStaff(<?= (int) $person['id_staff'] ?>)" class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
                                                             <i class="ph ph-pencil-simple text-xl"></i>
                                                         </button>
                                                     </div>
@@ -744,6 +744,104 @@ unset($_SESSION['flash_message']);
             </div>
         </div>
     </div>
+
+    <div id="modalEditarPersonal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <h3 class="text-lg font-bold">Modificar Personal</h3>
+                <button onclick="toggleModal('modalEditarPersonal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/personal/update" class="text-gray-800">
+                    <input type="hidden" name="id_staff" id="edit_id_staff">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                            <input type="text" id="edit_cedula" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                            <input type="text" id="edit_email" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                            <input type="text" name="first_name" id="edit_first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                            <input type="text" name="last_name" id="edit_last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select name="sex" id="edit_sex" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-gray-400">(opcional)</span></label>
+                            <input type="text" name="phone" id="edit_phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                            <select name="pas" id="edit_pas" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Docente">Docente</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Obrero">Obrero</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                            <select name="type_staff" id="edit_type_staff" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Contratado">Contratado</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select name="id_department" id="edit_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                        <?php echo htmlspecialchars($depto['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                            <select name="type_condition" id="edit_condition" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($conditions as $cond): ?>
+                                    <option value="<?php echo htmlspecialchars($cond['id_condition']); ?>">
+                                        <?php echo htmlspecialchars($cond['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                            <select name="type_contract" id="edit_contract" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($contractTypes as $ct): ?>
+                                    <option value="<?php echo htmlspecialchars($ct['id_contract']); ?>">
+                                        <?php echo htmlspecialchars($ct['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                        <button type="button" onclick="toggleModal('modalEditarPersonal')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     
     <script>
         // Lógica del Menú Móvil
@@ -823,6 +921,32 @@ unset($_SESSION['flash_message']);
             document.getElementById('viewPdfButton').href = '/personal/export-pdf-one?id=' + encodeURIComponent(record.id_staff);
 
             toggleModal('modalVerPersonal');
+        }
+
+        function editStaff(id) {
+            const record = staffData.find(function(item) {
+                return parseInt(item.id_staff, 10) === parseInt(id, 10);
+            });
+
+            if (!record) {
+                showToast('error', 'Registro no encontrado', 'El personal solicitado no está en la página actual.');
+                return;
+            }
+
+            document.getElementById('edit_id_staff').value = record.id_staff;
+            document.getElementById('edit_cedula').value = record.cedula || '';
+            document.getElementById('edit_email').value = record.email || '';
+            document.getElementById('edit_first_name').value = record.first_name || '';
+            document.getElementById('edit_last_name').value = record.last_name || '';
+            document.getElementById('edit_sex').value = record.sex || '';
+            document.getElementById('edit_phone').value = record.phone || '';
+            document.getElementById('edit_pas').value = record.pas || '';
+            document.getElementById('edit_type_staff').value = record.type_staff || '';
+            document.getElementById('edit_department').value = record.id_department || '';
+            document.getElementById('edit_condition').value = record.type_condition || '';
+            document.getElementById('edit_contract').value = record.type_contract || '';
+
+            toggleModal('modalEditarPersonal');
         }
 
         // =========================================================

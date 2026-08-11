@@ -19,6 +19,7 @@ class Staff{
                 tc.status as condition_status,
                 s.type_contract,
                 ct.name as contract_name,
+                s.id_department,
                 d.name as department_name,
                 u.cedula
             FROM 
@@ -43,6 +44,33 @@ class Staff{
         $stmt->bindValue(':id', (int) $id, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public static function update($id, array $data) {
+        $db = Database::getInstance();
+        $query = "UPDATE staff SET
+                    first_name     = :first_name,
+                    last_name      = :last_name,
+                    sex            = :sex,
+                    phone          = :phone,
+                    type_staff     = :type_staff,
+                    type_condition = :type_condition,
+                    id_department  = :id_department,
+                    pas            = :pas,
+                    type_contract  = :type_contract
+                  WHERE id_staff = :id_staff";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':first_name', $data['first_name']);
+        $stmt->bindValue(':last_name', $data['last_name']);
+        $stmt->bindValue(':sex', $data['sex']);
+        $stmt->bindValue(':phone', $data['phone'] !== '' ? $data['phone'] : null, $data['phone'] !== '' ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+        $stmt->bindValue(':type_staff', $data['type_staff']);
+        $stmt->bindValue(':type_condition', (int) $data['type_condition'], \PDO::PARAM_INT);
+        $stmt->bindValue(':id_department', (int) $data['id_department'], \PDO::PARAM_INT);
+        $stmt->bindValue(':pas', $data['pas']);
+        $stmt->bindValue(':type_contract', (int) $data['type_contract'], \PDO::PARAM_INT);
+        $stmt->bindValue(':id_staff', (int) $id, \PDO::PARAM_INT);
+        return $stmt->execute();
     }
 
     public static function countAll() {

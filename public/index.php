@@ -43,6 +43,7 @@ $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal/export-pdf-one', 'StaffController', 'exportPdfOne');
 $router->get('personal', 'StaffController', 'index');
 $router->post('personal/store', 'StaffController', 'store');
+$router->post('personal/update', 'StaffController', 'update');
 
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
