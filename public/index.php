@@ -53,6 +53,7 @@ $router->get('aulas/export-qr-pdf', 'AulaController', 'exportQrPdf');
 
 // --- RUTAS: Estudiantes (solo lectura) ---
 $router->get('estudiantes', 'EstudianteController', 'index');
+$router->get('estudiantes/export-pdf', 'EstudianteController', 'exportPdf');
 
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');

@@ -290,7 +290,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-slate-500 font-medium">Asistencia Promedio</p>
-                            <h3 class="text-3xl font-bold text-slate-900 mt-1">92%</h3>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">0%</h3>
                         </div>
                         <div class="p-3 bg-green-100 text-green-600 rounded-xl">
                             <i class="ph ph-calendar-check text-2xl"></i>

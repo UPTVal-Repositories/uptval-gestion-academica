@@ -177,9 +177,24 @@
                     <h2 class="text-2xl font-bold text-gray-900">Estudiantes</h2>
                     <p class="text-sm text-gray-500 mt-1">Listado de estudiantes registrados en el sistema. El registro se realiza desde el sistema de inscripcion.</p>
                 </div>
-                <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
-                    <i class="ph ph-info text-lg"></i>
-                    <span>Modulo de solo lectura</span>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                    <div class="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+                        <i class="ph ph-info text-lg"></i>
+                        <span>Modulo de solo lectura</span>
+                    </div>
+                    <?php
+                        $filterQuery = [];
+                        if (!empty($_GET['trayecto_filter'])) $filterQuery['trayecto_filter'] = $_GET['trayecto_filter'];
+                        if (!empty($_GET['especialidad_filter'])) $filterQuery['especialidad_filter'] = $_GET['especialidad_filter'];
+                        if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                        if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
+                        $pdfUrl = '/estudiantes/export-pdf' . (!empty($filterQuery) ? '?' . http_build_query($filterQuery) : '');
+                    ?>
+                    <a href="<?= $pdfUrl ?>"
+                       class="bg-white border border-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-50 w-full sm:w-auto">
+                        <i class="ph ph-file-pdf text-lg text-red-500"></i>
+                        Exportar PDF
+                    </a>
                 </div>
             </header>
 
