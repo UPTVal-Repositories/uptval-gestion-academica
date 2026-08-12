@@ -81,6 +81,7 @@ class RoleController{
 
         $activeRoles = RolUser::getRolesByUserId((int) $staff['id_user']);
         $activeRoleIds = RolUser::getRoleIdsByUserId((int) $staff['id_user']);
+        $activeAssignments = RolUser::getActiveAssignmentsByUserId((int) $staff['id_user']);
         $availableDepartments = Department::availableForCoordinator();
 
         echo json_encode([
@@ -95,6 +96,7 @@ class RoleController{
             ],
             'roles'                 => $activeRoles,
             'role_ids'              => $activeRoleIds,
+            'assignments'           => $activeAssignments,
             'has_role'              => count($activeRoles) > 0,
             'available_departments' => $availableDepartments
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
@@ -235,6 +237,33 @@ class RoleController{
         exit;
     }
 
+    private static function isAjax()
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    private static function respondOrRedirect($type, $title, $message, $url)
+    {
+        if (self::isAjax()) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'ok'      => $type === 'success',
+                'title'   => $title,
+                'message' => $message
+            ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            exit;
+        }
+
+        $_SESSION['flash_message'] = [
+            'type'    => $type,
+            'title'   => $title,
+            'message' => $message
+        ];
+        header("Location: " . $url);
+        exit;
+    }
+
     public function deactivate() {
 
         if (!Session::has('id_user')) {
@@ -250,65 +279,30 @@ class RoleController{
         $id = $_POST['id_rol_user'] ?? null;
 
         if (!ctype_digit((string) $id)) {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Asignación no válida',
-                'message' => 'El identificador de la asignación no es válido.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Asignación no válida', 'El identificador de la asignación no es válido.', '/personal/permisos-roles');
         }
 
         $assignment = RolUser::findAssignment((int) $id);
 
         if (!$assignment) {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Asignación no encontrada',
-                'message' => 'La asignación de rol solicitada no existe.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Asignación no encontrada', 'La asignación de rol solicitada no existe.', '/personal/permisos-roles');
         }
 
         if ($assignment['assignment_state'] === 'historico') {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Rol ya desasignado',
-                'message' => 'La asignación de este rol ya se encuentra en estado histórico.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Rol ya desasignado', 'La asignación de este rol ya se encuentra en estado histórico.', '/personal/permisos-roles');
         }
 
         if ($assignment['rol_name'] === 'Administrador' && RolUser::countActiveAdmins() <= 1) {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Acción bloqueada',
-                'message' => 'No se puede quitar el rol al último administrador activo del sistema.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Acción bloqueada', 'No se puede quitar el rol al último administrador activo del sistema.', '/personal/permisos-roles');
         }
 
         try {
             RolUser::deactivate((int) $id);
-            $_SESSION['flash_message'] = [
-                'type'    => 'success',
-                'title'   => 'Rol desasignado',
-                'message' => 'La asignación del rol pasó a estado histórico.'
-            ];
+            self::respondOrRedirect('success', 'Rol desasignado', 'La asignación del rol pasó a estado histórico.', '/personal/permisos-roles');
         } catch (\PDOException $e) {
             error_log("Error desasignando rol: " . $e->getMessage());
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Error al desasignar',
-                'message' => 'Ocurrió un error inesperado al desasignar el rol.'
-            ];
+            self::respondOrRedirect('error', 'Error al desasignar', 'Ocurrió un error inesperado al desasignar el rol.', '/personal/permisos-roles');
         }
-
-        header("Location: /personal/permisos-roles");
-        exit;
     }
 
     public function reactivate() {

@@ -663,10 +663,13 @@ unset($_SESSION['flash_message']);
 
             const currentRoleIds = data.role_ids || [];
 
-            const rolesChips = (data.roles || []).map(function(r) {
+            const rolesChips = (data.assignments || []).map(function(a) {
                 return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-uptval-orange/10 text-uptval-dark border border-uptval-orange/30">'
                     + '<i class="ph ph-shield-check"></i>'
-                    + esc(r)
+                    + esc(a.name)
+                    + '<button type="button" title="Quitar rol" data-rol-user-id="' + a.id_rol_user + '" data-rol-name="' + esc(a.name) + '" data-staff-name="' + esc(name) + '" onclick="removeRole(this)" class="p-0.5 rounded-full hover:bg-uptval-orange/20 text-gray-500 hover:text-red-600 transition-colors ml-0.5">'
+                    + '<i class="ph ph-x text-sm"></i>'
+                    + '</button>'
                     + '</span>';
             }).join('');
 
@@ -720,6 +723,46 @@ unset($_SESSION['flash_message']);
             }
 
             return html;
+        }
+
+        function removeRole(btn) {
+            const idRolUser = btn.getAttribute('data-rol-user-id');
+            const rolName = btn.getAttribute('data-rol-name');
+            const staffName = btn.getAttribute('data-staff-name');
+
+            if (!idRolUser) return;
+
+            if (!window.confirm('¿Quitar el rol "' + rolName + '" a ' + staffName + '?')) {
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData();
+            formData.append('id_rol_user', idRolUser);
+
+            fetch('/personal/permisos-roles/deactivate', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.ok) {
+                        showToast('success', data.title || 'Rol desasignado', data.message || 'La asignación del rol pasó a estado histórico.');
+                        searchByCedula();
+                    } else {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        showToast('error', data.title || 'No se pudo quitar el rol', data.message || 'Ocurrió un error al quitar el rol.');
+                    }
+                })
+                .catch(function() {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    showToast('error', 'Error al quitar el rol', 'Ocurrió un error inesperado. Intente nuevamente.');
+                });
         }
 
         function toggleDeptSelect(select) {

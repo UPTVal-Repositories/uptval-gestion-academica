@@ -56,6 +56,20 @@ class RolUser
         return array_map('intval', array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'id_rol'));
     }
 
+    public static function getActiveAssignmentsByUserId($idUser)
+    {
+        $db = Database::getInstance();
+        $query = "SELECT ru.id_rol_user, ru.id_rol, r.name
+                  FROM rol_user ru
+                  INNER JOIN rol r ON ru.id_rol = r.id_rol
+                  WHERE ru.id_user = :id_user AND ru.assignment_state = 'activo'
+                  ORDER BY r.name ASC";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id_user', (int) $idUser, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function countFilter($filters = []) {
         $db = Database::getInstance();
         $where = [];
