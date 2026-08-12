@@ -17,6 +17,50 @@ class User{
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public static function findById($idUser){
+        $db = Database::getInstance();
+        $query = "SELECT id_user, cedula, status FROM user WHERE id_user = :id_user LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id_user', (int) $idUser, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function activeWithRoles() {
+        $db = Database::getInstance();
+        $query = "SELECT u.id_user, u.cedula, u.status,
+                         s.first_name, s.last_name,
+                         ru.id_rol
+                  FROM user u
+                  LEFT JOIN staff s ON s.id_user = u.id_user
+                  LEFT JOIN rol_user ru ON ru.id_user = u.id_user AND ru.assignment_state = 'activo'
+                  WHERE u.status = 'activo'
+                  ORDER BY u.cedula ASC";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $users = [];
+        foreach ($rows as $row) {
+            $id = $row['id_user'];
+            if (!isset($users[$id])) {
+                $users[$id] = [
+                    'id_user'    => (int) $row['id_user'],
+                    'cedula'     => $row['cedula'],
+                    'first_name' => $row['first_name'],
+                    'last_name'  => $row['last_name'],
+                    'role_ids'   => []
+                ];
+            }
+            if ($row['id_rol'] !== null) {
+                $users[$id]['role_ids'][] = (int) $row['id_rol'];
+            }
+        }
+
+        return array_values($users);
+    }
+
     public static function updateRememberToken($idUser, $token){
         $db = Database::getInstance();
         $query = "UPDATE user SET remember_token = :token WHERE id_user = :id_user";

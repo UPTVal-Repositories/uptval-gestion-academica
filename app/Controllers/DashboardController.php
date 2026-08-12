@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Core\Session;
 use Models\Staff;
+use Models\Estudiante;
 
 class DashboardController {
 
@@ -30,6 +31,11 @@ class DashboardController {
         $total_staff     = $staffStats['total'] ?? 0;
         $activos_staff   = $staffStats['activos'] ?? 0;
         $inactivos_staff = $staffStats['inactivos'] ?? 0;
+
+        $estudianteStats = Estudiante::getDashboardStats();
+        $total_estudiantes     = $estudianteStats['total'] ?? 0;
+        $activos_estudiantes   = $estudianteStats['activos'] ?? 0;
+        $inactivos_estudiantes = $estudianteStats['inactivos'] ?? 0;
 
         $userRoles = Session::get('user_roles') ?? [];
 

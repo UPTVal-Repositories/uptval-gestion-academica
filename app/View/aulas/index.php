@@ -1,0 +1,755 @@
+<?php
+/**
+ * @var string $cedula
+ * @var string $last_connection
+ * @var int $page
+ * @var int $totalPages
+ * @var array $aulas
+ * @var array $departamentos
+ * @var array $tipos
+ * @var array $userRoles
+ */
+
+$flash = $_SESSION['flash_message'] ?? null;
+unset($_SESSION['flash_message']);
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Aulas y Laboratorios - UPTVal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        uptval: {
+                            orange: '#d97b29',
+                            dark: '#a35715',
+                            grey: '#808285'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+        .mobile-menu.open { transform: translateX(0); }
+        body.menu-open { overflow: hidden; }
+        @keyframes shrink {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .animate-shrink {
+            animation: shrink 4s linear forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 h-screen text-white font-sans flex flex-col overflow-hidden">
+
+    <div id="toast" class="fixed top-6 right-6 z-[200] transform transition-all duration-500 translate-x-[150%] opacity-0 w-full max-w-sm bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
+        <div class="p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0" id="toast-icon-container"></div>
+                <div class="ml-3 w-0 flex-1 pt-0.5">
+                    <p id="toast-title" class="text-sm font-medium text-gray-900"></p>
+                    <p id="toast-message" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button type="button" onclick="hideToast()" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-uptval-orange transition-colors">
+                        <span class="sr-only">Cerrar</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="h-1 bg-gray-50 w-full">
+            <div id="toast-progress" class="h-full w-full"></div>
+        </div>
+    </div>
+
+    <nav class="glass-panel border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50 shrink-0">
+        <div class="flex items-center gap-2">
+            <button id="menuToggle" class="md:hidden text-gray-300 hover:text-white focus:outline-none mr-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <h1 class="text-xl sm:text-2xl font-bold tracking-wider">
+                <span class="text-uptval-orange">UPT</span>Val
+            </h1>
+            <span class="text-xs text-gray-500 uppercase tracking-widest hidden md:inline ml-4 border-l border-gray-700 pl-4">Gestion Academica</span>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-medium text-gray-300">Usuario Activo</p>
+                <p class="text-xs text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula ?? ''); ?></p>
+                <?php if (!empty($last_connection)): ?>
+                    <p class="text-[11px] text-gray-500 mt-1">Ultima conexion: <?php echo htmlspecialchars($last_connection); ?></p>
+                <?php endif; ?>
+            </div>
+            <form action="/logout" method="POST" class="m-0">
+                <button type="submit" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-colors duration-300 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="hidden sm:inline">Salir</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <div class="absolute top-[-10%] left-[20%] w-96 h-96 bg-uptval-orange rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none z-0"></div>
+
+        <aside class="w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 shrink-0 overflow-y-auto hidden md:flex relative z-10">
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Menu Principal</p>
+            <nav class="space-y-1.5 flex-1">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-squares-four text-xl"></i>
+                    <span class="font-medium text-sm">Inicio</span>
+                </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-buildings text-xl"></i>
+                    <span class="font-medium text-sm">Gestion de Departamentos</span>
+                </a>
+                <?php endif; ?>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-books text-xl"></i>
+                    <span class="font-medium text-sm">Materias</span>
+                </a>
+                <?php endif; ?>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-users text-xl"></i>
+                    <span class="font-medium text-sm">Gestion de Personal</span>
+                </a>
+                <?php endif; ?>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
+                    <i class="ph ph-door text-xl"></i>
+                    <span class="font-medium text-sm">Aulas y Laboratorios</span>
+                </a>
+                <?php endif; ?>
+                <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-student text-xl"></i>
+                    <span class="font-medium text-sm">Estudiantes</span>
+                </a>
+                <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-book-open-text text-xl"></i>
+                    <span class="font-medium text-sm">Manual de Usuario</span>
+                </a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-calendar-check text-xl"></i>
+                    <span class="font-medium text-sm">Control de Asistencia</span>
+                </a>
+                <?php endif; ?>
+            </nav>
+            <?php if (in_array('Administrador', $userRoles)): ?>
+            <div class="mt-8">
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-gear text-xl"></i>
+                    <span class="font-medium text-sm">Configuracion</span>
+                </a>
+            </div>
+            <?php endif; ?>
+        </aside>
+
+        <div id="mobileSidebar" class="mobile-menu fixed top-0 left-0 h-full w-64 glass-panel border-r border-gray-800 flex flex-col py-6 px-4 z-50 md:hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-6 px-4">
+                <h2 class="text-lg font-bold text-white">Menu</h2>
+                <button id="closeMenu" class="text-gray-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <nav class="space-y-1.5 flex-1">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-squares-four text-xl"></i><span class="font-medium text-sm">Inicio</span></a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-buildings text-xl"></i><span class="font-medium text-sm">Gestion de Departamentos</span></a>
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-books text-xl"></i><span class="font-medium text-sm">Materias</span></a>
+                <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-users text-xl"></i><span class="font-medium text-sm">Gestion de Personal</span></a>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange"><i class="ph ph-door text-xl"></i><span class="font-medium text-sm">Aulas y Laboratorios</span></a>
+                <?php endif; ?>
+                <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-student text-xl"></i><span class="font-medium text-sm">Estudiantes</span></a>
+                <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-book-open-text text-xl"></i><span class="font-medium text-sm">Manual de Usuario</span></a>
+                <?php if (in_array('Administrador', $userRoles)): ?>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-calendar-check text-xl"></i><span class="font-medium text-sm">Control de Asistencia</span></a>
+                <div class="pt-6 mt-6 border-t border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"><i class="ph ph-gear text-xl"></i><span class="font-medium text-sm">Configuracion</span></a>
+                </div>
+                <?php endif; ?>
+            </nav>
+            <div class="mt-auto pt-4 border-t border-gray-800">
+                <div class="flex items-center gap-3 px-4 py-3">
+                    <div class="w-10 h-10 rounded-full bg-uptval-orange/20 flex items-center justify-center flex-shrink-0"><i class="ph ph-user text-xl text-uptval-orange"></i></div>
+                    <div class="flex-1"><p class="text-xs text-gray-400">Usuario Activo</p><p class="text-sm text-uptval-orange font-bold">C.I: <?php echo htmlspecialchars($cedula ?? ''); ?></p></div>
+                </div>
+            </div>
+        </div>
+        <div id="menuOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+        <main class="flex-1 overflow-y-auto bg-gray-50 text-gray-800 flex flex-col relative z-10">
+
+            <header class="bg-white px-6 sm:px-8 py-5 shadow-sm border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Aulas y Laboratorios</h2>
+                    <p class="text-sm text-gray-500 mt-1">Administra las aulas y laboratorios. Cada aula genera un codigo QR para el registro de asistencia de estudiantes y docentes.</p>
+                </div>
+                <button onclick="toggleModal('modalRegistrarAula')" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
+                    <i class="ph ph-plus-circle text-lg"></i>
+                    Registrar Aula
+                </button>
+            </header>
+
+            <div class="p-4 sm:p-6 md:p-8 flex-1">
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+                    <form method="GET" action="/aulas" class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <div class="relative w-full sm:max-w-xs">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-magnifying-glass text-gray-400"></i>
+                            </div>
+                            <input type="text" name="search" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por codigo o nombre...">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                    Departamento
+                                </label>
+                                <select name="department_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los Departamentos</option>
+                                    <?php foreach ($departamentos as $depto): ?>
+                                        <option value="<?php echo htmlspecialchars($depto['id_department']); ?>" <?php echo (($_GET['department_filter'] ?? '') == $depto['id_department']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($depto['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                    Tipo
+                                </label>
+                                <select name="type_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los tipos</option>
+                                    <?php foreach ($tipos as $key => $label): ?>
+                                        <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (($_GET['type_filter'] ?? '') === $key) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="relative">
+                                <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                    Estatus
+                                </label>
+                                <select name="status_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                    <option value="">Todos los estatus</option>
+                                    <option value="activo" <?php echo (($_GET['status_filter'] ?? '') === 'activo') ? 'selected' : ''; ?>>Activo</option>
+                                    <option value="inactivo" <?php echo (($_GET['status_filter'] ?? '') === 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left">Codigo</th>
+                                    <th scope="col" class="px-6 py-3 text-left">Nombre</th>
+                                    <th scope="col" class="px-6 py-3 text-left">Departamento</th>
+                                    <th scope="col" class="px-6 py-3 text-left">Tipo</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Estatus</th>
+                                    <th scope="col" class="px-6 py-3 text-center">QR</th>
+                                    <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php $hasFilters = !empty($_GET['department_filter'] ?? $_GET['type_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? ''); ?>
+                                <?php if (empty($aulas) && $hasFilters): ?>
+                                    <tr>
+                                        <td colspan="7" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
+                                            No se encontraron resultados con los filtros aplicados.
+                                        </td>
+                                    </tr>
+                                <?php elseif (empty($aulas)): ?>
+                                    <tr>
+                                        <td colspan="7" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <i class="ph ph-door text-5xl mb-3 block opacity-50"></i>
+                                            No hay aulas ni laboratorios registrados en el sistema.
+                                        </td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($aulas as $aula): ?>
+                                        <?php
+                                            $aulaActive = ($aula['status'] ?? 'activo') === 'activo';
+                                            $tipoLabel = ($aula['type'] === 'laboratorio') ? 'Laboratorio' : 'Aula';
+                                            $tipoIcon = ($aula['type'] === 'laboratorio') ? 'ph-flask' : 'ph-door';
+                                            $tipoColor = ($aula['type'] === 'laboratorio') ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200';
+                                        ?>
+                                        <tr class="hover:bg-gray-50 transition-colors <?php echo $aulaActive ? '' : 'opacity-60'; ?>">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900 font-mono font-semibold">
+                                                    <?php echo htmlspecialchars($aula['code']); ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    <?php echo htmlspecialchars($aula['name']); ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center gap-1.5">
+                                                    <i class="ph ph-buildings text-slate-400"></i>
+                                                    <div class="text-sm text-gray-900">
+                                                        <?php echo htmlspecialchars($aula['department_name']); ?>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full <?php echo $tipoColor; ?>">
+                                                    <i class="ph <?php echo $tipoIcon; ?>"></i>
+                                                    <?php echo htmlspecialchars($tipoLabel); ?>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <?php if ($aulaActive): ?>
+                                                    <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700 border border-green-300">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                        Activo
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-300">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                                        Inactivo
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <button type="button"
+                                                        onclick='showQrModal(<?php echo (int) $aula["id_aula"]; ?>, <?php echo json_encode($aula["code"], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, <?php echo json_encode($tipoLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-black text-white text-xs font-medium rounded-lg transition-colors shadow-sm">
+                                                    <i class="ph ph-qr-code text-lg"></i>
+                                                    Ver QR
+                                                </button>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div class="flex items-center justify-end gap-2">
+                                                    <button type="button"
+                                                            onclick="openEditAula(this)"
+                                                            data-id="<?php echo (int) $aula['id_aula']; ?>"
+                                                            data-code="<?php echo htmlspecialchars($aula['code']); ?>"
+                                                            data-name="<?php echo htmlspecialchars($aula['name']); ?>"
+                                                            data-type="<?php echo htmlspecialchars($aula['type']); ?>"
+                                                            data-department="<?php echo htmlspecialchars($aula['id_department']); ?>"
+                                                            class="text-slate-400 hover:text-blue-500 transition-colors p-1" title="Editar aula">
+                                                        <i class="ph ph-pencil text-xl"></i>
+                                                    </button>
+
+                                                    <?php if ($aulaActive): ?>
+                                                    <form method="POST" action="/aulas/toggle-status" class="m-0">
+                                                        <input type="hidden" name="id_aula" value="<?php echo (int) $aula['id_aula']; ?>">
+                                                        <button type="button"
+                                                                onclick="confirmAccion('Desactivar aula', 'Desea desactivar el aula &quot;<?php echo htmlspecialchars($aula['code']); ?>&quot;? Podra reactivarla en cualquier momento.', 'Si, desactivar', 'warn', this.closest('form'))"
+                                                                class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar aula">
+                                                            <i class="ph ph-user-minus text-xl"></i>
+                                                        </button>
+                                                    </form>
+                                                    <?php else: ?>
+                                                    <form method="POST" action="/aulas/toggle-status" class="m-0">
+                                                        <input type="hidden" name="id_aula" value="<?php echo (int) $aula['id_aula']; ?>">
+                                                        <button type="submit" class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar aula">
+                                                            <i class="ph ph-user-check text-xl"></i>
+                                                        </button>
+                                                    </form>
+                                                    <?php endif; ?>
+
+                                                    <form method="POST" action="/aulas/delete" class="m-0">
+                                                        <input type="hidden" name="id_aula" value="<?php echo (int) $aula['id_aula']; ?>">
+                                                        <button type="button"
+                                                                onclick="confirmAccion('Eliminar aula', 'Esta seguro de eliminar el aula &quot;<?php echo htmlspecialchars($aula['code']); ?>&quot;? Esta accion no se puede deshacer.', 'Si, eliminar', 'danger', this.closest('form'))"
+                                                                class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar aula">
+                                                            <i class="ph ph-trash text-xl"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <?php
+                        $filterQuery = [];
+                        if (!empty($_GET['department_filter'])) $filterQuery['department_filter'] = $_GET['department_filter'];
+                        if (!empty($_GET['type_filter'])) $filterQuery['type_filter'] = $_GET['type_filter'];
+                        if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                        if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
+                        $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';
+                    ?>
+
+                    <div class="flex items-center justify-center border-t border-gray-200 bg-gray-50/50 px-4 py-4 sm:px-6 w-full">
+                        <div class="flex items-center gap-6">
+                            <?php if ($page > 1): ?>
+                                <a href="/aulas?page=<?= $page - 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    Anterior
+                                </a>
+                            <?php else: ?>
+                                <button disabled class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100/50 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed shadow-sm">
+                                    Anterior
+                                </button>
+                            <?php endif; ?>
+
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Pagina <span class="font-medium"><?= $page ?></span> de
+                                    <span class="font-medium"><?= $totalPages > 0 ? $totalPages : 1 ?></span>
+                                </p>
+                            </div>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a href="/aulas?page=<?= $page + 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    Siguiente
+                                </a>
+                            <?php else: ?>
+                                <button disabled class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100/50 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed shadow-sm">
+                                    Siguiente
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Registrar Aula -->
+    <div id="modalRegistrarAula" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <div>
+                    <h3 class="text-lg font-bold">Registrar Aula / Laboratorio</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Cada aula o laboratorio tendra su propio codigo QR para el registro de asistencia.</p>
+                </div>
+                <button onclick="toggleModal('modalRegistrarAula')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/aulas/store" class="grid grid-cols-1 gap-5">
+                    <div>
+                        <label for="aula_code" class="block text-sm font-medium text-gray-700 mb-1">Codigo</label>
+                        <input type="text" id="aula_code" name="code" required maxlength="20" placeholder="Ej: A-101, LAB-COMP-01"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                    </div>
+                    <div>
+                        <label for="aula_name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <input type="text" id="aula_name" name="name" required maxlength="120" placeholder="Ej: Aula de Programacion"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                    </div>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label for="aula_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="aula_type" name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($tipos as $key => $label): ?>
+                                    <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars($label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="aula_department" class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select id="aula_department" name="id_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo (int) $depto['id_department']; ?>"><?php echo htmlspecialchars($depto['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="mt-2 px-4 py-2.5 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Registrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Editar Aula -->
+    <div id="modalEditarAula" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <div>
+                    <h3 class="text-lg font-bold">Editar Aula</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Actualice los datos del aula o laboratorio.</p>
+                </div>
+                <button onclick="toggleModal('modalEditarAula')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/aulas/update" class="grid grid-cols-1 gap-5">
+                    <input type="hidden" name="id_aula" id="edit_aula_id">
+                    <div>
+                        <label for="edit_aula_code" class="block text-sm font-medium text-gray-700 mb-1">Codigo</label>
+                        <input type="text" id="edit_aula_code" name="code" required maxlength="20"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                    </div>
+                    <div>
+                        <label for="edit_aula_name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <input type="text" id="edit_aula_name" name="name" required maxlength="120"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                    </div>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label for="edit_aula_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="edit_aula_type" name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($tipos as $key => $label): ?>
+                                    <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars($label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit_aula_department" class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select id="edit_aula_department" name="id_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo (int) $depto['id_department']; ?>"><?php echo htmlspecialchars($depto['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="mt-2 px-4 py-2.5 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ver QR -->
+    <div id="modalQrAula" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <div>
+                    <h3 class="text-lg font-bold">Codigo QR</h3>
+                    <p id="qrAulaTitle" class="text-xs text-gray-500 mt-0.5">Escanee este codigo para registrar asistencia.</p>
+                </div>
+                <button onclick="toggleModal('modalQrAula')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6 text-center">
+                <div id="qrCodeContainer" class="inline-flex items-center justify-center p-4 bg-white rounded-xl border border-gray-200 shadow-sm min-h-[250px]">
+                    <i class="ph ph-spinner ph-spin text-4xl text-gray-300"></i>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 mt-6 justify-center">
+                    <a id="qrDownloadPdf" href="#" class="px-4 py-2.5 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 transition-all">
+                        <i class="ph ph-file-pdf text-lg text-red-400"></i>
+                        Descargar PDF
+                    </a>
+                    <button type="button" onclick="toggleModal('modalQrAula')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmacion -->
+    <div id="modalConfirmAccion" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
+            <div class="px-6 pt-8 pb-6 text-center">
+                <div id="confirmAccionIconWrap" class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                    <i id="confirmAccionIcon" class="ph ph-trash text-3xl text-red-600"></i>
+                </div>
+                <h3 id="confirmAccionTitle" class="text-xl font-bold text-gray-900">Eliminar?</h3>
+                <p id="confirmAccionMessage" class="mt-2 text-sm text-gray-500">Esta seguro de realizar esta accion?</p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                <button type="button" onclick="toggleModal('modalConfirmAccion')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="button" id="confirmAccionBtn" onclick="confirmAccionSubmit()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
+                    <i class="ph ph-trash text-lg"></i>
+                    Si, eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const closeMenu = document.getElementById('closeMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+
+        function openMenu() {
+            mobileSidebar.classList.add('open');
+            menuOverlay.classList.remove('hidden');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeMenuFunc() {
+            mobileSidebar.classList.remove('open');
+            menuOverlay.classList.add('hidden');
+            document.body.classList.remove('menu-open');
+        }
+
+        if (menuToggle) menuToggle.addEventListener('click', openMenu);
+        if (closeMenu) closeMenu.addEventListener('click', closeMenuFunc);
+        if (menuOverlay) menuOverlay.addEventListener('click', closeMenuFunc);
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) closeMenuFunc();
+        });
+
+        function toggleModal(modalID) {
+            const modal = document.getElementById(modalID);
+            const content = modal.querySelector('.modal-content');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(function() {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(function() {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 150);
+            }
+        }
+
+        function openEditAula(btn) {
+            document.getElementById('edit_aula_id').value = btn.getAttribute('data-id');
+            document.getElementById('edit_aula_code').value = btn.getAttribute('data-code');
+            document.getElementById('edit_aula_name').value = btn.getAttribute('data-name');
+            document.getElementById('edit_aula_type').value = btn.getAttribute('data-type');
+            document.getElementById('edit_aula_department').value = btn.getAttribute('data-department');
+            toggleModal('modalEditarAula');
+        }
+
+        function showQrModal(idAula, code, tipoLabel) {
+            toggleModal('modalQrAula');
+            document.getElementById('qrAulaTitle').innerText = tipoLabel + ' ' + code + ' - Escanee este codigo para registrar asistencia.';
+            document.getElementById('qrDownloadPdf').href = '/aulas/export-qr-pdf?id_aula=' + idAula;
+
+            const container = document.getElementById('qrCodeContainer');
+            container.innerHTML = '<i class="ph ph-spinner ph-spin text-4xl text-gray-300"></i>';
+
+            fetch('/aulas/qr-svg?id_aula=' + idAula)
+                .then(function(res) { return res.text(); })
+                .then(function(svg) {
+                    container.innerHTML = '<div style="width:250px;height:250px;">' + svg + '</div>';
+                })
+                .catch(function() {
+                    container.innerHTML = '<p class="text-red-500 text-sm">Error al cargar el codigo QR.</p>';
+                });
+        }
+
+        let pendingConfirmForm = null;
+
+        function confirmAccion(title, message, btnLabel, type, form) {
+            document.getElementById('confirmAccionTitle').innerText = title;
+            document.getElementById('confirmAccionMessage').innerText = message;
+
+            const iconWrap = document.getElementById('confirmAccionIconWrap');
+            const icon = document.getElementById('confirmAccionIcon');
+            const btn = document.getElementById('confirmAccionBtn');
+
+            if (type === 'danger') {
+                iconWrap.className = 'mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4';
+                icon.className = 'ph ph-trash text-3xl text-red-600';
+                btn.className = 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors';
+                btn.innerHTML = '<i class="ph ph-trash text-lg"></i>' + btnLabel;
+            } else {
+                iconWrap.className = 'mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4';
+                icon.className = 'ph ph-pause text-3xl text-amber-600';
+                btn.className = 'px-4 py-2 bg-uptval-orange hover:bg-uptval-dark text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors';
+                btn.innerHTML = '<i class="ph ph-user-minus text-lg"></i>' + btnLabel;
+            }
+
+            pendingConfirmForm = form;
+            toggleModal('modalConfirmAccion');
+        }
+
+        function confirmAccionSubmit() {
+            if (pendingConfirmForm) {
+                const form = pendingConfirmForm;
+                pendingConfirmForm = null;
+                toggleModal('modalConfirmAccion');
+                form.submit();
+            }
+        }
+
+        const icons = {
+            success: '<svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            error: '<svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+        };
+
+        function showToast(type, title, message) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastProgress = document.getElementById('toast-progress');
+            const iconContainer = document.getElementById('toast-icon-container');
+
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+
+            if (type === 'error') {
+                iconContainer.innerHTML = icons.error;
+                toastProgress.className = 'h-full w-full bg-red-400';
+            } else {
+                iconContainer.innerHTML = icons.success;
+                toastProgress.className = 'h-full w-full bg-green-400';
+            }
+
+            toastProgress.classList.remove('animate-shrink');
+            void toastProgress.offsetWidth;
+            toastProgress.classList.add('animate-shrink');
+
+            toast.classList.remove('translate-x-[150%]', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(function() { hideToast(); }, 4000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-x-0', 'opacity-100');
+            toast.classList.add('translate-x-[150%]', 'opacity-0');
+        }
+    </script>
+
+    <?php if ($flash): ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            showToast('<?= $flash['type'] ?>', '<?= addslashes($flash['title']) ?>', '<?= addslashes($flash['message']) ?>');
+        });
+    </script>
+    <?php endif; ?>
+</body>
+</html>

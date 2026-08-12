@@ -7,6 +7,8 @@ class Staff{
 
     private static $baseSelect = "SELECT 
                 s.id_staff,
+                u.id_user,
+                u.status,
                 s.first_name,
                 s.last_name,
                 s.sex,
@@ -19,6 +21,7 @@ class Staff{
                 tc.status as condition_status,
                 s.type_contract,
                 ct.name as contract_name,
+                s.id_department,
                 d.name as department_name,
                 u.cedula
             FROM 
@@ -34,6 +37,51 @@ class Staff{
         $stmt = $db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function findById($id){
+        $db = Database::getInstance();
+        $query = self::$baseSelect . " WHERE s.id_staff = :id LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public static function findByCedula($cedula){
+        $db = Database::getInstance();
+        $query = self::$baseSelect . " WHERE u.cedula = :cedula LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':cedula', $cedula);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public static function update($id, array $data) {
+        $db = Database::getInstance();
+        $query = "UPDATE staff SET
+                    first_name     = :first_name,
+                    last_name      = :last_name,
+                    sex            = :sex,
+                    phone          = :phone,
+                    type_staff     = :type_staff,
+                    type_condition = :type_condition,
+                    id_department  = :id_department,
+                    pas            = :pas,
+                    type_contract  = :type_contract
+                  WHERE id_staff = :id_staff";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':first_name', $data['first_name']);
+        $stmt->bindValue(':last_name', $data['last_name']);
+        $stmt->bindValue(':sex', $data['sex']);
+        $stmt->bindValue(':phone', $data['phone'] !== '' ? $data['phone'] : null, $data['phone'] !== '' ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+        $stmt->bindValue(':type_staff', $data['type_staff']);
+        $stmt->bindValue(':type_condition', (int) $data['type_condition'], \PDO::PARAM_INT);
+        $stmt->bindValue(':id_department', (int) $data['id_department'], \PDO::PARAM_INT);
+        $stmt->bindValue(':pas', $data['pas']);
+        $stmt->bindValue(':type_contract', (int) $data['type_contract'], \PDO::PARAM_INT);
+        $stmt->bindValue(':id_staff', (int) $id, \PDO::PARAM_INT);
+        return $stmt->execute();
     }
 
     public static function countAll() {
@@ -193,5 +241,51 @@ class Staff{
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function createWithUser(array $data) {
+        $db = Database::getInstance();
+        $db->beginTransaction();
+
+        try {
+            $tempPassword = bin2hex(random_bytes(6));
+            $hashedPassword = password_hash($tempPassword, PASSWORD_DEFAULT);
+
+            $sqlUser = "INSERT INTO `user` (cedula, recovery_email, password, status)
+                        VALUES (:cedula, :email, :password, 'pendiente')";
+            $stmt = $db->prepare($sqlUser);
+            $stmt->bindValue(':cedula', $data['cedula']);
+            $stmt->bindValue(':email', $data['email']);
+            $stmt->bindValue(':password', $hashedPassword);
+            $stmt->execute();
+
+            $idUser = (int) $db->lastInsertId();
+
+            $sqlStaff = "INSERT INTO staff (
+                            id_user, first_name, last_name, sex, phone, email,
+                            type_staff, type_condition, id_department, pas, type_contract
+                         ) VALUES (
+                            :id_user, :first_name, :last_name, :sex, :phone, :email,
+                            :type_staff, :type_condition, :id_department, :pas, :type_contract
+                         )";
+            $stmt = $db->prepare($sqlStaff);
+            $stmt->bindValue(':id_user', $idUser, \PDO::PARAM_INT);
+            $stmt->bindValue(':first_name', $data['first_name']);
+            $stmt->bindValue(':last_name', $data['last_name']);
+            $stmt->bindValue(':sex', $data['sex']);
+            $stmt->bindValue(':phone', $data['phone'] !== '' ? $data['phone'] : null, $data['phone'] !== '' ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+            $stmt->bindValue(':email', $data['email']);
+            $stmt->bindValue(':type_staff', $data['type_staff']);
+            $stmt->bindValue(':type_condition', (int) $data['type_condition'], \PDO::PARAM_INT);
+            $stmt->bindValue(':id_department', (int) $data['id_department'], \PDO::PARAM_INT);
+            $stmt->bindValue(':pas', $data['pas']);
+            $stmt->bindValue(':type_contract', (int) $data['type_contract'], \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $db->commit();
+        } catch (\Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
     }
 }

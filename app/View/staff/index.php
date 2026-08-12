@@ -153,22 +153,40 @@ unset($_SESSION['flash_message']);
         </a>
 
         <?php if (in_array('Administrador', $userRoles)): ?>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+        <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
             <i class="ph ph-buildings text-xl"></i>
             <span class="font-medium text-sm">Gestión de Departamentos</span>
         </a>
         <?php endif; ?>
 
         <?php if (in_array('Administrador', $userRoles)): ?>
-        <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
-            <i class="ph ph-users text-xl"></i>
-            <span class="font-medium text-sm">Gestión de Personal</span>
+        <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+            <i class="ph ph-books text-xl"></i>
+            <span class="font-medium text-sm">Materias</span>
         </a>
         <?php endif; ?>
 
-        <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+        <?php if (in_array('Administrador', $userRoles)): ?>
+        <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
+            <i class="ph ph-users text-xl"></i>
+            <span class="font-medium text-sm">Gestion de Personal</span>
+        </a>
+        <?php endif; ?>
+
+        <?php if (in_array('Administrador', $userRoles)): ?>
+        <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+            <i class="ph ph-door text-xl"></i>
+            <span class="font-medium text-sm">Aulas y Laboratorios</span>
+        </a>
+        <?php endif; ?>
+
+        <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
             <i class="ph ph-student text-xl"></i>
             <span class="font-medium text-sm">Estudiantes</span>
+        </a>
+        <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+            <i class="ph ph-book-open-text text-xl"></i>
+            <span class="font-medium text-sm">Manual de Usuario</span>
         </a>
 
         <?php if (in_array('Administrador', $userRoles)): ?>
@@ -184,7 +202,7 @@ unset($_SESSION['flash_message']);
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                         <i class="ph ph-gear text-xl"></i>
-                        <span class="font-medium text-sm">Configuración</span>
+                        <span class="font-medium text-sm">Configuracion</span>
                     </a>
                 </div>
                 <?php endif; ?>
@@ -204,18 +222,30 @@ unset($_SESSION['flash_message']);
                         <span class="font-medium text-sm">Inicio</span>
                     </a>
                     <?php if (in_array('Administrador', $userRoles)): ?>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                    <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-buildings text-xl"></i>
                         <span class="font-medium text-sm">Gestión de Departamentos</span>
                     </a>
+                    <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                        <i class="ph ph-books text-xl"></i>
+                        <span class="font-medium text-sm">Materias</span>
+                    </a>
                     <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange">
                         <i class="ph ph-users text-xl"></i>
-                        <span class="font-medium text-sm">Gestión de Personal</span>
+                        <span class="font-medium text-sm">Gestion de Personal</span>
+                    </a>
+                    <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                        <i class="ph ph-door text-xl"></i>
+                        <span class="font-medium text-sm">Aulas y Laboratorios</span>
                     </a>
                     <?php endif; ?>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                    <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-student text-xl"></i>
                         <span class="font-medium text-sm">Estudiantes</span>
+                    </a>
+                    <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                        <i class="ph ph-book-open-text text-xl"></i>
+                        <span class="font-medium text-sm">Manual de Usuario</span>
                     </a>
                     <?php if (in_array('Administrador', $userRoles)): ?>
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
@@ -226,7 +256,7 @@ unset($_SESSION['flash_message']);
                     <div class="pt-6 mt-6 border-t border-gray-800">
                         <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                             <i class="ph ph-gear text-xl"></i>
-                            <span class="font-medium text-sm">Configuración</span>
+                            <span class="font-medium text-sm">Configuracion</span>
                         </a>
                     </div>
                     <?php endif; ?>
@@ -290,11 +320,11 @@ unset($_SESSION['flash_message']);
                                     <i class="ph ph-users-three text-lg"></i>
                                     Directorio General
                                 </a>
-                                <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                                <a href="/personal/asignacion-academica" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
                                     <i class="ph ph-books text-lg"></i>
                                     Asignación Académica
                                 </a>
-                                <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                                <a href="/personal/permisos-roles" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
                                     <i class="ph ph-shield-check text-lg"></i>
                                     Permisos y Roles
                                 </a>
@@ -464,10 +494,10 @@ unset($_SESSION['flash_message']);
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div class="flex items-center justify-end gap-2">
-                                                        <button class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Ver Detalles">
+                                                        <button onclick="viewStaff(<?= (int) $person['id_staff'] ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Ver Detalles">
                                                             <i class="ph ph-eye text-xl"></i>
                                                         </button>
-                                                        <button class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
+                                                        <button onclick="editStaff(<?= (int) $person['id_staff'] ?>)" class="text-slate-400 hover:text-amber-500 transition-colors p-1" title="Editar">
                                                             <i class="ph ph-pencil-simple text-xl"></i>
                                                         </button>
                                                     </div>
@@ -586,43 +616,259 @@ unset($_SESSION['flash_message']);
         </div>
 
     <div id="modalRegistrar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform modal-content" id="modalContent">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content" id="modalContent">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
                 <h3 class="text-lg font-bold">Registrar Nuevo Personal</h3>
                 <button onclick="toggleModal('modalRegistrar')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
             <div class="p-6">
-                <form class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-gray-800">
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                <form method="POST" action="/personal/store" class="text-gray-800">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                            <input type="text" name="cedula" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                            <input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                            <input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select name="sex" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                            <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-gray-400">(opcional)</span></label>
+                            <input type="text" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                            <select name="pas" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Docente">Docente</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Obrero">Obrero</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                            <select name="type_staff" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Contratado">Contratado</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select name="id_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                        <?php echo htmlspecialchars($depto['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                            <select name="type_condition" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($conditions as $cond): ?>
+                                    <option value="<?php echo htmlspecialchars($cond['id_condition']); ?>">
+                                        <?php echo htmlspecialchars($cond['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                            <select name="type_contract" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($contractTypes as $ct): ?>
+                                    <option value="<?php echo htmlspecialchars($ct['id_contract']); ?>">
+                                        <?php echo htmlspecialchars($ct['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
-                    </div>
-                    <div class="col-span-1 sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
-                        <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
-                            <option value="Docente">Docente</option>
-                            <option value="Administrativo">Administrativo</option>
-                        </select>
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
-                            <option value="1">Ingeniería en Informática</option>
-                        </select>
+                    <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                        <button type="button" onclick="toggleModal('modalRegistrar')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Registro</button>
                     </div>
                 </form>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
-                <button onclick="toggleModal('modalRegistrar')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
-                <button class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Registro</button>
+        </div>
+    </div>
+
+    <div id="modalVerPersonal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <h3 class="text-lg font-bold">Detalle del Personal</h3>
+                <button onclick="toggleModal('modalVerPersonal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-gray-800">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                        <input type="text" id="view_cedula" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                        <input type="text" id="view_first_name" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                        <input type="text" id="view_last_name" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                        <input type="text" id="view_sex" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                        <input type="text" id="view_email" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                        <input type="text" id="view_phone" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                        <input type="text" id="view_pas" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                        <input type="text" id="view_type_staff" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <input type="text" id="view_department" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                        <input type="text" id="view_condition" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                        <input type="text" id="view_contract" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                <a id="viewPdfButton" href="#" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md text-center">
+                    <i class="ph ph-file-pdf text-lg text-red-500 mr-1"></i> Descargar PDF
+                </a>
+                <button onclick="toggleModal('modalVerPersonal')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEditarPersonal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <h3 class="text-lg font-bold">Modificar Personal</h3>
+                <button onclick="toggleModal('modalEditarPersonal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/personal/update" class="text-gray-800">
+                    <input type="hidden" name="id_staff" id="edit_id_staff">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                            <input type="text" id="edit_cedula" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                            <input type="text" id="edit_email" readonly class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 outline-none">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                            <input type="text" name="first_name" id="edit_first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                            <input type="text" name="last_name" id="edit_last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select name="sex" id="edit_sex" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-gray-400">(opcional)</span></label>
+                            <input type="text" name="phone" id="edit_phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Personal</label>
+                            <select name="pas" id="edit_pas" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Docente">Docente</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Obrero">Obrero</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Nombramiento</label>
+                            <select name="type_staff" id="edit_type_staff" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Contratado">Contratado</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select name="id_department" id="edit_department" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($departamentos as $depto): ?>
+                                    <option value="<?php echo htmlspecialchars($depto['id_department']); ?>">
+                                        <?php echo htmlspecialchars($depto['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                            <select name="type_condition" id="edit_condition" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($conditions as $cond): ?>
+                                    <option value="<?php echo htmlspecialchars($cond['id_condition']); ?>">
+                                        <?php echo htmlspecialchars($cond['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                            <select name="type_contract" id="edit_contract" required class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($contractTypes as $ct): ?>
+                                    <option value="<?php echo htmlspecialchars($ct['id_contract']); ?>">
+                                        <?php echo htmlspecialchars($ct['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                        <button type="button" onclick="toggleModal('modalEditarPersonal')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md w-full sm:w-auto">Guardar Cambios</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -673,6 +919,64 @@ unset($_SESSION['flash_message']);
                     modal.classList.remove('flex');
                 }, 150);
             }
+        }
+
+        // =========================================================
+        // LÓGICA DE VER PERSONAL (MODAL + PDF)
+        // =========================================================
+        const staffData = <?php echo json_encode($staffList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+        function viewStaff(id) {
+            const record = staffData.find(function(item) {
+                return parseInt(item.id_staff, 10) === parseInt(id, 10);
+            });
+
+            if (!record) {
+                showToast('error', 'Registro no encontrado', 'El personal solicitado no está en la página actual.');
+                return;
+            }
+
+            document.getElementById('view_cedula').value = record.cedula || '';
+            document.getElementById('view_first_name').value = record.first_name || '';
+            document.getElementById('view_last_name').value = record.last_name || '';
+            document.getElementById('view_sex').value = record.sex === 'M' ? 'Masculino' : (record.sex === 'F' ? 'Femenino' : record.sex || '');
+            document.getElementById('view_email').value = record.email || '';
+            document.getElementById('view_phone').value = record.phone || 'No registrado';
+            document.getElementById('view_pas').value = record.pas || '';
+            document.getElementById('view_type_staff').value = record.type_staff || '';
+            document.getElementById('view_department').value = record.department_name || 'Sin Asignar';
+            document.getElementById('view_condition').value = record.condition_name || 'Sin condicion';
+            document.getElementById('view_contract').value = record.contract_name || 'Sin contrato';
+
+            document.getElementById('viewPdfButton').href = '/personal/export-pdf-one?id=' + encodeURIComponent(record.id_staff);
+
+            toggleModal('modalVerPersonal');
+        }
+
+        function editStaff(id) {
+            const record = staffData.find(function(item) {
+                return parseInt(item.id_staff, 10) === parseInt(id, 10);
+            });
+
+            if (!record) {
+                showToast('error', 'Registro no encontrado', 'El personal solicitado no está en la página actual.');
+                return;
+            }
+
+            document.getElementById('edit_id_staff').value = record.id_staff;
+            document.getElementById('edit_cedula').value = record.cedula || '';
+            document.getElementById('edit_email').value = record.email || '';
+            document.getElementById('edit_first_name').value = record.first_name || '';
+            document.getElementById('edit_last_name').value = record.last_name || '';
+            document.getElementById('edit_sex').value = record.sex || '';
+            document.getElementById('edit_phone').value = record.phone || '';
+            document.getElementById('edit_pas').value = record.pas || '';
+            document.getElementById('edit_type_staff').value = record.type_staff || '';
+            document.getElementById('edit_department').value = record.id_department || '';
+            document.getElementById('edit_condition').value = record.type_condition || '';
+            document.getElementById('edit_contract').value = record.type_contract || '';
+
+            toggleModal('modalEditarPersonal');
         }
 
         // =========================================================
