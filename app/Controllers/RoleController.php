@@ -25,7 +25,7 @@ class RoleController{
 
         $filters = [
             'id_rol' => $_GET['role_filter'] ?? null,
-            'state'  => $_GET['state_filter'] ?? null,
+            'status' => $_GET['status_filter'] ?? null,
             'search' => $_GET['search'] ?? null
         ];
 
@@ -264,7 +264,7 @@ class RoleController{
         exit;
     }
 
-    public function deactivate() {
+    public function delete() {
 
         if (!Session::has('id_user')) {
             header("Location: /login");
@@ -288,24 +288,20 @@ class RoleController{
             self::respondOrRedirect('error', 'Asignación no encontrada', 'La asignación de rol solicitada no existe.', '/personal/permisos-roles');
         }
 
-        if ($assignment['assignment_state'] === 'historico') {
-            self::respondOrRedirect('error', 'Rol ya desasignado', 'La asignación de este rol ya se encuentra en estado histórico.', '/personal/permisos-roles');
-        }
-
         if ($assignment['rol_name'] === 'Administrador' && RolUser::countActiveAdmins() <= 1) {
-            self::respondOrRedirect('error', 'Acción bloqueada', 'No se puede quitar el rol al último administrador activo del sistema.', '/personal/permisos-roles');
+            self::respondOrRedirect('error', 'Acción bloqueada', 'No se puede eliminar el rol al último administrador activo del sistema.', '/personal/permisos-roles');
         }
 
         try {
-            RolUser::deactivate((int) $id);
-            self::respondOrRedirect('success', 'Rol desasignado', 'La asignación del rol pasó a estado histórico.', '/personal/permisos-roles');
+            RolUser::delete((int) $id);
+            self::respondOrRedirect('success', 'Rol eliminado', 'La asignación del rol fue eliminada correctamente.', '/personal/permisos-roles');
         } catch (\PDOException $e) {
-            error_log("Error desasignando rol: " . $e->getMessage());
-            self::respondOrRedirect('error', 'Error al desasignar', 'Ocurrió un error inesperado al desasignar el rol.', '/personal/permisos-roles');
+            error_log("Error eliminando rol: " . $e->getMessage());
+            self::respondOrRedirect('error', 'Error al eliminar', 'Ocurrió un error inesperado al eliminar el rol.', '/personal/permisos-roles');
         }
     }
 
-    public function reactivate() {
+    public function toggleStatus() {
 
         if (!Session::has('id_user')) {
             header("Location: /login");
@@ -320,69 +316,40 @@ class RoleController{
         $id = $_POST['id_rol_user'] ?? null;
 
         if (!ctype_digit((string) $id)) {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Asignación no válida',
-                'message' => 'El identificador de la asignación no es válido.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Asignación no válida', 'El identificador de la asignación no es válido.', '/personal/permisos-roles');
         }
 
         $assignment = RolUser::findAssignment((int) $id);
 
         if (!$assignment) {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Asignación no encontrada',
-                'message' => 'La asignación de rol solicitada no existe.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+            self::respondOrRedirect('error', 'Asignación no encontrada', 'La asignación de rol solicitada no existe.', '/personal/permisos-roles');
         }
 
-        if ($assignment['assignment_state'] === 'activo') {
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Rol ya activo',
-                'message' => 'La asignación de este rol ya se encuentra en estado activo.'
-            ];
-            header("Location: /personal/permisos-roles");
-            exit;
+        $currentState = $assignment['assignment_state'] === 'activo' ? 'activo' : 'inactivo';
+        $newState = $currentState === 'activo' ? 'inactivo' : 'activo';
+
+        if ($newState === 'inactivo' && $assignment['rol_name'] === 'Administrador' && RolUser::countActiveAdmins() <= 1) {
+            self::respondOrRedirect('error', 'Acción bloqueada', 'No se puede desactivar el rol al último administrador activo del sistema.', '/personal/permisos-roles');
+        }
+
+        if ($newState === 'activo' && $assignment['rol_name'] === 'Coordinador') {
+            $idDepartment = $assignment['id_department'] ?? null;
+            if ($idDepartment !== null && RolUser::countActiveCoordinators((int) $idDepartment, (int) $assignment['id_user']) > 0) {
+                self::respondOrRedirect('error', 'Departamento ocupado', 'El departamento ya tiene un coordinador activo. Debe quitarle la coordinación al otro usuario antes de reactivar este rol.', '/personal/permisos-roles');
+            }
         }
 
         try {
-            $result = RolUser::reactivate((int) $id);
-            if ($result === 'department_taken') {
-                $_SESSION['flash_message'] = [
-                    'type'    => 'error',
-                    'title'   => 'Departamento ocupado',
-                    'message' => 'No se puede reactivar la asignación: el departamento ya tiene otro coordinador activo.'
-                ];
-            } elseif ($result === 'not_found') {
-                $_SESSION['flash_message'] = [
-                    'type'    => 'error',
-                    'title'   => 'Asignación no reactivable',
-                    'message' => 'La asignación del rol no pudo ser reactivada.'
-                ];
-            } else {
-                $_SESSION['flash_message'] = [
-                    'type'    => 'success',
-                    'title'   => 'Rol reactivado',
-                    'message' => 'La asignación del rol volvió a estado activo.'
-                ];
-            }
+            RolUser::setState((int) $id, $newState);
+            $title = $newState === 'activo' ? 'Rol activado' : 'Rol desactivado';
+            $message = $newState === 'activo'
+                ? 'El rol se reactivó correctamente para el usuario.'
+                : 'El rol se desactivó correctamente para el usuario.';
+            self::respondOrRedirect('success', $title, $message, '/personal/permisos-roles');
         } catch (\PDOException $e) {
-            error_log("Error reactivando rol: " . $e->getMessage());
-            $_SESSION['flash_message'] = [
-                'type'    => 'error',
-                'title'   => 'Error al reactivar',
-                'message' => 'Ocurrió un error inesperado al reactivar el rol.'
-            ];
+            error_log("Error cambiando estatus del rol: " . $e->getMessage());
+            self::respondOrRedirect('error', 'Error al cambiar estatus', 'Ocurrió un error inesperado al cambiar el estatus del rol.', '/personal/permisos-roles');
         }
-
-        header("Location: /personal/permisos-roles");
-        exit;
     }
 
     public function exportPdf() {
@@ -395,7 +362,7 @@ class RoleController{
 
         $filters = [
             'id_rol' => $_GET['role_filter'] ?? null,
-            'state'  => $_GET['state_filter'] ?? null,
+            'status' => $_GET['status_filter'] ?? null,
             'search' => $_GET['search'] ?? null
         ];
 
@@ -455,14 +422,12 @@ class RoleController{
                         <th>Nombre</th>
                         <th>Rol</th>
                         <th>Departamento</th>
-                        <th>Estado</th>
                         <th>Fecha Asignacion</th>
                     </tr>
                 </thead>
                 <tbody>';
 
             foreach ($chunk as $assignment) {
-                $state = $assignment['assignment_state'] === 'activo' ? 'Activo' : 'Historico';
                 $assignmentDate = !empty($assignment['assignment_date'])
                     ? date('d/m/Y', strtotime($assignment['assignment_date']))
                     : '---';
@@ -474,7 +439,6 @@ class RoleController{
                     <td>' . htmlspecialchars(trim(($assignment['last_name'] ?? '') . ', ' . ($assignment['first_name'] ?? ''))) . '</td>
                     <td>' . htmlspecialchars($assignment['rol_name']) . '</td>
                     <td>' . $departmentCell . '</td>
-                    <td>' . $state . '</td>
                     <td>' . $assignmentDate . '</td>
                 </tr>';
             }

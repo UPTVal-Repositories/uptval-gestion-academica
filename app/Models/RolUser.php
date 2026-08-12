@@ -83,6 +83,10 @@ class RolUser
             $where[] = "ru.assignment_state = :state";
             $params[':state'] = $filters['state'];
         }
+        if (!empty($filters['status'])) {
+            $where[] = "u.status = :status";
+            $params[':status'] = $filters['status'];
+        }
         if (!empty($filters['search'])) {
             $where[] = "(u.cedula LIKE :search OR s.first_name LIKE :search OR s.last_name LIKE :search)";
             $params[':search'] = '%' . $filters['search'] . '%';
@@ -118,6 +122,10 @@ class RolUser
         if (!empty($filters['state'])) {
             $where[] = "ru.assignment_state = :state";
             $params[':state'] = $filters['state'];
+        }
+        if (!empty($filters['status'])) {
+            $where[] = "u.status = :status";
+            $params[':status'] = $filters['status'];
         }
         if (!empty($filters['search'])) {
             $where[] = "(u.cedula LIKE :search OR s.first_name LIKE :search OR s.last_name LIKE :search)";
@@ -200,17 +208,19 @@ class RolUser
 
     private static function doAssign($db, $existing, $idUser, $idRol, $idDepartment) {
         if ($existing) {
-            if ($existing['assignment_state'] === 'activo') {
-                return 'already';
+            if ($existing['assignment_state'] === 'inactivo') {
+                $query = "UPDATE rol_user
+                          SET assignment_state = 'activo',
+                              id_department = :dept,
+                              assignment_date = NOW()
+                          WHERE id_rol_user = :id";
+                $stmt = $db->prepare($query);
+                $stmt->bindValue(':dept', $idDepartment !== null ? (int) $idDepartment : null, \PDO::PARAM_INT);
+                $stmt->bindValue(':id', (int) $existing['id_rol_user'], \PDO::PARAM_INT);
+                $stmt->execute();
+                return 'reactivated';
             }
-            $query = "UPDATE rol_user
-                      SET assignment_state = 'activo', assignment_date = NOW(), id_department = :dept
-                      WHERE id_rol_user = :id";
-            $stmt = $db->prepare($query);
-            $stmt->bindValue(':dept', $idDepartment !== null ? (int) $idDepartment : null, \PDO::PARAM_INT);
-            $stmt->bindValue(':id', (int) $existing['id_rol_user'], \PDO::PARAM_INT);
-            $stmt->execute();
-            return 'reactivated';
+            return 'already';
         }
 
         $query = "INSERT INTO rol_user (id_user, id_rol, id_department, assignment_state, assignment_date)
@@ -244,38 +254,22 @@ class RolUser
         return (int) $stmt->fetch(\PDO::FETCH_ASSOC)['total'];
     }
 
-    public static function deactivate($idRolUser) {
+    public static function delete($idRolUser) {
         $db = Database::getInstance();
-        $query = "UPDATE rol_user
-                  SET assignment_state = 'historico'
-                  WHERE id_rol_user = :id AND assignment_state = 'activo'";
+        $query = "DELETE FROM rol_user WHERE id_rol_user = :id";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':id', (int) $idRolUser, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->rowCount() > 0;
     }
 
-    public static function reactivate($idRolUser) {
+    public static function setState($idRolUser, $state) {
         $db = Database::getInstance();
-        $assignment = self::findAssignment((int) $idRolUser);
-
-        if (!$assignment) {
-            return 'not_found';
-        }
-
-        if (!empty($assignment['id_department'])) {
-            if (self::countActiveCoordinators((int) $assignment['id_department'], (int) $assignment['id_user']) > 0) {
-                return 'department_taken';
-            }
-        }
-
-        $query = "UPDATE rol_user
-                  SET assignment_state = 'activo', assignment_date = NOW()
-                  WHERE id_rol_user = :id AND assignment_state = 'historico'";
+        $query = "UPDATE rol_user SET assignment_state = :state WHERE id_rol_user = :id";
         $stmt = $db->prepare($query);
+        $stmt->bindValue(':state', $state);
         $stmt->bindValue(':id', (int) $idRolUser, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->rowCount() > 0 ? 'ok' : 'not_found';
+        return $stmt->execute();
     }
 
     public static function countActiveAdmins() {

@@ -249,7 +249,7 @@ unset($_SESSION['flash_message']);
                         <?php
                             $pdfQuery = [];
                             if (!empty($_GET['role_filter'])) $pdfQuery['role_filter'] = $_GET['role_filter'];
-                            if (!empty($_GET['state_filter'])) $pdfQuery['state_filter'] = $_GET['state_filter'];
+                            if (!empty($_GET['status_filter'])) $pdfQuery['status_filter'] = $_GET['status_filter'];
                             if (!empty($_GET['search'])) $pdfQuery['search'] = $_GET['search'];
                             $pdfUrl = '/personal/permisos-roles/export-pdf' . (!empty($pdfQuery) ? '?' . http_build_query($pdfQuery) : '');
                         ?>
@@ -260,7 +260,7 @@ unset($_SESSION['flash_message']);
                         </a>
                         <button onclick="openAssignModal()" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
                             <i class="ph ph-user-plus text-lg"></i>
-                            Asignar Rol
+                            Asignar/Quitar Rol
                         </button>
                     </div>
                 </header>
@@ -312,12 +312,12 @@ unset($_SESSION['flash_message']);
 
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
-                                        Estado
+                                        Estatus
                                     </label>
-                                    <select name="state_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
-                                        <option value="">Todos los Estados</option>
-                                        <option value="activo" <?php echo (($_GET['state_filter'] ?? '') === 'activo') ? 'selected' : ''; ?>>Activo</option>
-                                        <option value="historico" <?php echo (($_GET['state_filter'] ?? '') === 'historico') ? 'selected' : ''; ?>>Historico</option>
+                                    <select name="status_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todos los estatus</option>
+                                        <option value="activo" <?php echo (($_GET['status_filter'] ?? '') === 'activo') ? 'selected' : ''; ?>>Activo</option>
+                                        <option value="inactivo" <?php echo (($_GET['status_filter'] ?? '') === 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
                                     </select>
                                 </div>
 
@@ -331,14 +331,14 @@ unset($_SESSION['flash_message']);
                                         <th scope="col" class="px-6 py-3 text-left">Cedula</th>
                                         <th scope="col" class="px-6 py-3 text-left">Usuario</th>
                                         <th scope="col" class="px-6 py-3 text-center">Rol</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Estatus</th>
                                         <th scope="col" class="px-6 py-3 text-left">Departamento</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Estado</th>
                                         <th scope="col" class="px-6 py-3 text-right">Fecha Asignación</th>
                                         <th scope="col" class="px-6 py-3 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($roleAssignments) && !empty($_GET['role_filter'] ?? $_GET['state_filter'] ?? $_GET['search'] ?? '')): ?>
+                                    <?php if (empty($roleAssignments) && !empty($_GET['role_filter'] ?? $_GET['search'] ?? '')): ?>
                                         <tr>
                                             <td colspan="7" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
@@ -359,12 +359,13 @@ unset($_SESSION['flash_message']);
                                                     substr($assignment['first_name'] ?? '?', 0, 1) .
                                                     substr($assignment['last_name'] ?? '?', 0, 1)
                                                 );
-                                                $isActive = $assignment['assignment_state'] === 'activo';
                                                 $assignmentDate = !empty($assignment['assignment_date'])
                                                     ? date('d/m/Y', strtotime($assignment['assignment_date']))
                                                     : '---';
+                                                $assignmentState = $assignment['assignment_state'] ?? 'activo';
+                                                $isActive = $assignmentState === 'activo';
                                             ?>
-                                            <tr class="hover:bg-gray-50 transition-colors">
+                                            <tr data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>" class="hover:bg-gray-50 transition-colors <?php echo $isActive ? '' : 'opacity-60'; ?>">
 
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-gray-900 font-mono">
@@ -396,6 +397,20 @@ unset($_SESSION['flash_message']);
                                                     </span>
                                                 </td>
 
+                                                <td data-status-badge class="px-6 py-4 whitespace-nowrap text-center">
+                                                    <?php if ($isActive): ?>
+                                                        <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700 border border-green-300">
+                                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                            Activo
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-300">
+                                                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                                            Inactivo
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </td>
+
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <?php if (!empty($assignment['id_department'])): ?>
                                                     <div class="flex items-center gap-1.5">
@@ -411,40 +426,32 @@ unset($_SESSION['flash_message']);
                                                     <?php endif; ?>
                                                 </td>
 
-                                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                    <?php if ($isActive): ?>
-                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700 border border-green-200">
-                                                            Activo
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-200">
-                                                            Historico
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </td>
-
                                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                                     <div class="text-sm text-gray-900">
                                                         <?php echo htmlspecialchars($assignmentDate); ?>
                                                     </div>
                                                 </td>
 
-                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <td data-toggle-action class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div class="flex items-center justify-end gap-2">
                                                         <?php if ($isActive): ?>
-                                                            <form method="POST" action="/personal/permisos-roles/deactivate" onsubmit="return confirm('¿Está seguro de quitar el rol \"<?php echo htmlspecialchars($assignment['rol_name']); ?>\" al usuario C.I <?php echo htmlspecialchars($assignment['cedula']); ?>? La asignación pasará a estado histórico.');" class="m-0">
-                                                                <input type="hidden" name="id_rol_user" value="<?php echo (int) $assignment['id_rol_user']; ?>">
-                                                                <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Quitar rol">
-                                                                    <i class="ph ph-user-minus text-xl"></i>
-                                                                </button>
-                                                            </form>
+                                                            <button type="button" onclick="confirmToggleRol(this)"
+                                                                    data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>"
+                                                                    data-rol-name="<?php echo htmlspecialchars($assignment['rol_name']); ?>"
+                                                                    data-cedula="<?php echo htmlspecialchars($assignment['cedula']); ?>"
+                                                                    data-current-state="activo"
+                                                                    class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar rol">
+                                                                <i class="ph ph-user-minus text-xl"></i>
+                                                            </button>
                                                         <?php else: ?>
-                                                            <form method="POST" action="/personal/permisos-roles/reactivate" onsubmit="return confirm('¿Desea reactivar el rol \"<?php echo htmlspecialchars($assignment['rol_name']); ?>\" al usuario C.I <?php echo htmlspecialchars($assignment['cedula']); ?>?');" class="m-0">
-                                                                <input type="hidden" name="id_rol_user" value="<?php echo (int) $assignment['id_rol_user']; ?>">
-                                                                <button type="submit" class="text-slate-400 hover:text-green-600 transition-colors p-1" title="Reactivar rol">
-                                                                    <i class="ph ph-user-plus text-xl"></i>
-                                                                </button>
-                                                            </form>
+                                                            <button type="button" onclick="confirmToggleRol(this)"
+                                                                    data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>"
+                                                                    data-rol-name="<?php echo htmlspecialchars($assignment['rol_name']); ?>"
+                                                                    data-cedula="<?php echo htmlspecialchars($assignment['cedula']); ?>"
+                                                                    data-current-state="inactivo"
+                                                                    class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar rol">
+                                                                <i class="ph ph-user-check text-xl"></i>
+                                                            </button>
                                                         <?php endif; ?>
                                                     </div>
                                                 </td>
@@ -460,7 +467,7 @@ unset($_SESSION['flash_message']);
                             <?php
                                 $filterQuery = [];
                                 if (!empty($_GET['role_filter'])) $filterQuery['role_filter'] = $_GET['role_filter'];
-                                if (!empty($_GET['state_filter'])) $filterQuery['state_filter'] = $_GET['state_filter'];
+                                if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
                                 if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                                 $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';
                             ?>
@@ -503,8 +510,8 @@ unset($_SESSION['flash_message']);
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
                 <div>
-                    <h3 class="text-lg font-bold">Asignar Rol</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Un staff puede tener varios roles (ej. Docente y Coordinador).</p>
+                    <h3 class="text-lg font-bold">Asignar/Quitar Rol</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Un Personal puede tener varios roles (ej. Docente y Coordinador).</p>
                 </div>
                 <button onclick="toggleModal('modalAsignarRol')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
@@ -529,6 +536,56 @@ unset($_SESSION['flash_message']);
                 <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
                     <button type="button" onclick="toggleModal('modalAsignarRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cerrar</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfirmQuitarRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
+            <div class="px-6 pt-8 pb-6 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                    <i class="ph ph-trash text-3xl text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">¿Eliminar el rol?</h3>
+                <p class="mt-2 text-sm text-gray-500">
+                    Se eliminará el rol
+                    <span class="font-semibold text-uptval-dark" id="confirmRoleName"></span>
+                    al usuario
+                    <span class="font-semibold text-gray-900" id="confirmStaffName"></span>.
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                <button type="button" onclick="toggleModal('modalConfirmQuitarRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="button" id="confirmRemoveRoleBtn" onclick="confirmRemoveRoleAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
+                    <i class="ph ph-trash text-lg"></i>
+                    Sí, eliminar rol
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfirmToggleRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
+            <div class="px-6 pt-8 pb-6 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                    <i class="ph ph-pause text-3xl text-amber-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">¿Desactivar el rol?</h3>
+                <p class="mt-2 text-sm text-gray-500">
+                    Se desactivará el rol
+                    <span class="font-semibold text-uptval-dark" id="confirmToggleRoleName"></span>
+                    al usuario
+                    <span class="font-semibold text-gray-900" id="confirmToggleStaffName"></span>.
+                    Podrá reactivarlo en cualquier momento.
+                </p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
+                <button type="button" onclick="toggleModal('modalConfirmToggleRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="button" id="confirmToggleRoleBtn" onclick="confirmToggleRoleAction()" class="px-4 py-2 bg-uptval-orange hover:bg-uptval-dark text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
+                    <i class="ph ph-user-minus text-lg"></i>
+                    Sí, desactivar
+                </button>
             </div>
         </div>
     </div>
@@ -667,7 +724,7 @@ unset($_SESSION['flash_message']);
                 return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-uptval-orange/10 text-uptval-dark border border-uptval-orange/30">'
                     + '<i class="ph ph-shield-check"></i>'
                     + esc(a.name)
-                    + '<button type="button" title="Quitar rol" data-rol-user-id="' + a.id_rol_user + '" data-rol-name="' + esc(a.name) + '" data-staff-name="' + esc(name) + '" onclick="removeRole(this)" class="p-0.5 rounded-full hover:bg-uptval-orange/20 text-gray-500 hover:text-red-600 transition-colors ml-0.5">'
+                    + '<button type="button" title="Eliminar rol" data-rol-user-id="' + a.id_rol_user + '" data-rol-name="' + esc(a.name) + '" data-staff-name="' + esc(name) + '" onclick="removeRole(this)" class="p-0.5 rounded-full hover:bg-uptval-orange/20 text-gray-500 hover:text-red-600 transition-colors ml-0.5">'
                     + '<i class="ph ph-x text-sm"></i>'
                     + '</button>'
                     + '</span>';
@@ -725,6 +782,8 @@ unset($_SESSION['flash_message']);
             return html;
         }
 
+        let pendingRoleRemoval = null;
+
         function removeRole(btn) {
             const idRolUser = btn.getAttribute('data-rol-user-id');
             const rolName = btn.getAttribute('data-rol-name');
@@ -732,9 +791,21 @@ unset($_SESSION['flash_message']);
 
             if (!idRolUser) return;
 
-            if (!window.confirm('¿Quitar el rol "' + rolName + '" a ' + staffName + '?')) {
-                return;
-            }
+            document.getElementById('confirmRoleName').innerText = rolName;
+            document.getElementById('confirmStaffName').innerText = staffName;
+            pendingRoleRemoval = { btn: btn, idRolUser: idRolUser };
+
+            toggleModal('modalConfirmQuitarRol');
+        }
+
+        function confirmRemoveRoleAction() {
+            if (!pendingRoleRemoval) return;
+
+            const btn = pendingRoleRemoval.btn;
+            const idRolUser = pendingRoleRemoval.idRolUser;
+            pendingRoleRemoval = null;
+
+            toggleModal('modalConfirmQuitarRol');
 
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -742,7 +813,7 @@ unset($_SESSION['flash_message']);
             const formData = new FormData();
             formData.append('id_rol_user', idRolUser);
 
-            fetch('/personal/permisos-roles/deactivate', {
+            fetch('/personal/permisos-roles/delete', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
@@ -750,19 +821,144 @@ unset($_SESSION['flash_message']);
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (data.ok) {
-                        showToast('success', data.title || 'Rol desasignado', data.message || 'La asignación del rol pasó a estado histórico.');
+                        showToast('success', data.title || 'Rol eliminado', data.message || 'La asignación del rol fue eliminada correctamente.');
                         searchByCedula();
+                        removeRowFromTable(idRolUser);
                     } else {
                         btn.disabled = false;
                         btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        showToast('error', data.title || 'No se pudo quitar el rol', data.message || 'Ocurrió un error al quitar el rol.');
+                        showToast('error', data.title || 'No se pudo eliminar el rol', data.message || 'Ocurrió un error al eliminar el rol.');
                     }
                 })
                 .catch(function() {
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    showToast('error', 'Error al quitar el rol', 'Ocurrió un error inesperado. Intente nuevamente.');
+                    showToast('error', 'Error al eliminar el rol', 'Ocurrió un error inesperado. Intente nuevamente.');
                 });
+        }
+
+        // =========================================================
+        // LÓGICA DE DESACTIVAR/ACTIVAR ROL (TOGGLE DE ESTATUS)
+        // =========================================================
+        function statusBadgeHtml(state) {
+            if (state === 'activo') {
+                return '<span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700 border border-green-300">'
+                    + '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Activo</span>';
+            }
+            return '<span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500 border border-gray-300">'
+                + '<span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo</span>';
+        }
+
+        function toggleActionHtml(idRolUser, state, rolName, cedula) {
+            if (state === 'activo') {
+                return '<button type="button" onclick="confirmToggleRol(this)"'
+                    + ' data-id-rol-user="' + idRolUser + '"'
+                    + ' data-rol-name="' + esc(rolName) + '"'
+                    + ' data-cedula="' + esc(cedula) + '"'
+                    + ' data-current-state="activo"'
+                    + ' class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar rol">'
+                    + '<i class="ph ph-user-minus text-xl"></i></button>';
+            }
+            return '<button type="button" onclick="confirmToggleRol(this)"'
+                + ' data-id-rol-user="' + idRolUser + '"'
+                + ' data-rol-name="' + esc(rolName) + '"'
+                + ' data-cedula="' + esc(cedula) + '"'
+                + ' data-current-state="inactivo"'
+                + ' class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar rol">'
+                + '<i class="ph ph-user-check text-xl"></i></button>';
+        }
+
+        let pendingToggle = null;
+
+        function confirmToggleRol(btn) {
+            const idRolUser = btn.getAttribute('data-id-rol-user');
+            const currentState = btn.getAttribute('data-current-state');
+
+            if (!idRolUser) return;
+
+            if (currentState === 'inactivo') {
+                performToggle(idRolUser, 'activo', btn);
+                return;
+            }
+
+            document.getElementById('confirmToggleRoleName').innerText = btn.getAttribute('data-rol-name');
+            document.getElementById('confirmToggleStaffName').innerText = 'C.I ' + btn.getAttribute('data-cedula');
+            pendingToggle = { idRolUser: idRolUser, btn: btn };
+
+            toggleModal('modalConfirmToggleRol');
+        }
+
+        function confirmToggleRoleAction() {
+            if (!pendingToggle) return;
+
+            const idRolUser = pendingToggle.idRolUser;
+            const btn = pendingToggle.btn;
+            pendingToggle = null;
+
+            toggleModal('modalConfirmToggleRol');
+            performToggle(idRolUser, 'inactivo', btn);
+        }
+
+        function performToggle(idRolUser, newState, btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData();
+            formData.append('id_rol_user', idRolUser);
+
+            fetch('/personal/permisos-roles/toggle-status', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.ok) {
+                        showToast('success', data.title || 'Rol actualizado', data.message || 'El estatus del rol fue actualizado correctamente.');
+                        updateRowAfterToggle(idRolUser, newState);
+                    } else {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        showToast('error', data.title || 'No se pudo actualizar', data.message || 'Ocurrió un error al actualizar el estatus.');
+                    }
+                })
+                .catch(function() {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    showToast('error', 'Error al actualizar', 'Ocurrió un error inesperado. Intente nuevamente.');
+                });
+        }
+
+        function updateRowAfterToggle(idRolUser, newState) {
+            const row = document.querySelector('tr[data-id-rol-user="' + idRolUser + '"]');
+            if (!row) {
+                location.reload();
+                return;
+            }
+
+            row.classList.toggle('opacity-60', newState !== 'activo');
+
+            const badgeCell = row.querySelector('[data-status-badge]');
+            if (badgeCell) badgeCell.innerHTML = statusBadgeHtml(newState);
+
+            const actionCell = row.querySelector('[data-toggle-action]');
+            if (actionCell) {
+                const currentBtn = row.querySelector('button[data-id-rol-user="' + idRolUser + '"]');
+                const rolName = currentBtn ? currentBtn.getAttribute('data-rol-name') : '';
+                const cedula = currentBtn ? currentBtn.getAttribute('data-cedula') : '';
+                actionCell.innerHTML = toggleActionHtml(idRolUser, newState, rolName, cedula);
+            }
+        }
+
+        function removeRowFromTable(idRolUser) {
+            const rows = document.querySelectorAll('tr[data-id-rol-user="' + idRolUser + '"]');
+            rows.forEach(function(row) { row.remove(); });
+
+            const tbody = document.querySelector('table tbody');
+            const remaining = tbody ? tbody.querySelectorAll('tr[data-id-rol-user]').length : 0;
+            if (remaining === 0) {
+                location.reload();
+            }
         }
 
         function toggleDeptSelect(select) {
