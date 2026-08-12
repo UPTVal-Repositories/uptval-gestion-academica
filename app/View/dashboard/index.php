@@ -120,18 +120,30 @@
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
                 <?php if (in_array('Administrador', $userRoles)): ?>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-books text-xl"></i>
+                    <span class="font-medium text-sm">Materias</span>
+                </a>
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
-                    <span class="font-medium text-sm">Gestión de Personal</span>
+                    <span class="font-medium text-sm">Gestion de Personal</span>
+                </a>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-door text-xl"></i>
+                    <span class="font-medium text-sm">Aulas y Laboratorios</span>
                 </a>
                 <?php endif; ?>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
+                </a>
+                <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-book-open-text text-xl"></i>
+                    <span class="font-medium text-sm">Manual de Usuario</span>
                 </a>
                 <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
@@ -146,7 +158,7 @@
                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-gear text-xl"></i>
-                    <span class="font-medium text-sm">Configuración</span>
+                    <span class="font-medium text-sm">Configuracion</span>
                 </a>
             </div>
             <?php endif; ?>
@@ -166,28 +178,41 @@
                     <span class="font-medium text-sm">Inicio</span>
                 </a>
                 <?php if (in_array('Administrador', $userRoles)): ?>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-books text-xl"></i>
+                    <span class="font-medium text-sm">Materias</span>
+                </a>
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
-                    <span class="font-medium text-sm">Gestión de Personal</span>
+                    <span class="font-medium text-sm">Gestion de Personal</span>
+                </a>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-door text-xl"></i>
+                    <span class="font-medium text-sm">Aulas y Laboratorios</span>
                 </a>
                 <?php endif; ?>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-student text-xl"></i>
                     <span class="font-medium text-sm">Estudiantes</span>
+                </a>
+                <a href="/documentacion" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-book-open-text text-xl"></i>
+                    <span class="font-medium text-sm">Manual de Usuario</span>
                 </a>
                 <?php if (in_array('Administrador', $userRoles)): ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
+
                 <div class="pt-6 mt-6 border-t border-gray-800">
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                         <i class="ph ph-gear text-xl"></i>
-                        <span class="font-medium text-sm">Configuración</span>
+                        <span class="font-medium text-sm">Configuracion</span>
                     </a>
                 </div>
                 <?php endif; ?>
@@ -247,7 +272,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
-                            <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1"><?= number_format($total_estudiantes ?? 0) ?></h3>
                         </div>
                         <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
                             <i class="ph ph-student text-2xl"></i>
@@ -273,7 +298,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-slate-500 font-medium">Asistencia Promedio</p>
-                            <h3 class="text-3xl font-bold text-slate-900 mt-1">92%</h3>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">0%</h3>
                         </div>
                         <div class="p-3 bg-green-100 text-green-600 rounded-xl">
                             <i class="ph ph-calendar-check text-2xl"></i>
@@ -365,25 +390,29 @@
                                 <div class="p-2 bg-blue-50 text-blue-500 rounded-lg"><i class="ph ph-student text-xl"></i></div>
                             </div>
                             
+                            <?php
+                                $pctActivosChart1 = ($total_estudiantes > 0) ? round(($activos_estudiantes / $total_estudiantes) * 100) : 0;
+                                $pctInactivosChart1 = 100 - $pctActivosChart1;
+                            ?>
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
                                     <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
                                         <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="<?= $pctActivosChart1 ?> <?= $pctInactivosChart1 ?>" stroke-linecap="round"></circle>
                                     </svg>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-2xl font-bold text-slate-800"><?= number_format($total_estudiantes ?? 0) ?></span>
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-4 w-full xl:w-auto">
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
-                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                        <span class="text-base font-bold text-slate-900"><?= number_format($activos_estudiantes ?? 0) ?></span>
                                     </div>
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
-                                        <span class="text-base font-bold text-slate-900">188</span>
+                                        <span class="text-base font-bold text-slate-900"><?= number_format($inactivos_estudiantes ?? 0) ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -447,7 +476,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-slate-500 font-medium">Total Estudiantes</p>
-                                <h3 class="text-3xl font-bold text-slate-900 mt-1">1,248</h3>
+                                <h3 class="text-3xl font-bold text-slate-900 mt-1"><?= number_format($total_estudiantes ?? 0) ?></h3>
                             </div>
                             <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
                                 <i class="ph ph-student text-2xl"></i>
@@ -467,25 +496,29 @@
                 <div class="max-w-2xl mx-auto">
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col relative">
                         <div class="p-6 pb-2">
+                            <?php
+                                $pctActivosChart2 = ($total_estudiantes > 0) ? round(($activos_estudiantes / $total_estudiantes) * 100) : 0;
+                                $pctInactivosChart2 = 100 - $pctActivosChart2;
+                            ?>
                             <div class="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8 mb-6">
                                 <div class="relative w-36 h-36 flex-shrink-0">
                                     <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
                                         <circle cx="20" cy="20" r="15.915" fill="none" stroke="#e0e7ff" stroke-width="5"></circle>
-                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="85 15" stroke-linecap="round"></circle>
+                                        <circle class="chart-circle" cx="20" cy="20" r="15.915" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="<?= $pctActivosChart2 ?> <?= $pctInactivosChart2 ?>" stroke-linecap="round"></circle>
                                     </svg>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span class="text-2xl font-bold text-slate-800">1,248</span>
+                                        <span class="text-2xl font-bold text-slate-800"><?= number_format($total_estudiantes ?? 0) ?></span>
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-4 w-full xl:w-auto">
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm font-medium text-slate-600">Regulares</span></div>
-                                        <span class="text-base font-bold text-slate-900">1,060</span>
+                                        <span class="text-base font-bold text-slate-900"><?= number_format($activos_estudiantes ?? 0) ?></span>
                                     </div>
                                     <div class="flex items-center justify-between gap-6">
                                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-indigo-100"></div><span class="text-sm font-medium text-slate-600">Inactivos</span></div>
-                                        <span class="text-base font-bold text-slate-900">188</span>
+                                        <span class="text-base font-bold text-slate-900"><?= number_format($inactivos_estudiantes ?? 0) ?></span>
                                     </div>
                                 </div>
                             </div>
