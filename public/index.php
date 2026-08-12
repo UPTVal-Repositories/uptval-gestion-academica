@@ -51,6 +51,9 @@ $router->post('aulas/delete', 'AulaController', 'delete');
 $router->get('aulas/qr-svg', 'AulaController', 'qrSvg');
 $router->get('aulas/export-qr-pdf', 'AulaController', 'exportQrPdf');
 
+// --- RUTAS: Estudiantes (solo lectura) ---
+$router->get('estudiantes', 'EstudianteController', 'index');
+
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal/export-pdf-one', 'StaffController', 'exportPdfOne');

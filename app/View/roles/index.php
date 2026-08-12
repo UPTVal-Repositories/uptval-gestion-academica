@@ -167,7 +167,7 @@ unset($_SESSION['flash_message']);
                     </a>
                     <?php endif; ?>
 
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                         <i class="ph ph-student text-xl"></i>
                         <span class="font-medium text-sm">Estudiantes</span>
                     </a>
@@ -222,7 +222,7 @@ unset($_SESSION['flash_message']);
                         <span class="font-medium text-sm">Aulas y Laboratorios</span>
                     </a>
                     <?php endif; ?>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                    <a href="/estudiantes" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                         <i class="ph ph-student text-xl"></i>
                         <span class="font-medium text-sm">Estudiantes</span>
                     </a>
