@@ -130,7 +130,11 @@
                 </a>
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
-                    <span class="font-medium text-sm">Gestión de Personal</span>
+                    <span class="font-medium text-sm">Gestion de Personal</span>
+                </a>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-door text-xl"></i>
+                    <span class="font-medium text-sm">Aulas y Laboratorios</span>
                 </a>
                 <?php endif; ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
@@ -150,7 +154,7 @@
                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-4">Sistema</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-gear text-xl"></i>
-                    <span class="font-medium text-sm">Configuración</span>
+                    <span class="font-medium text-sm">Configuracion</span>
                 </a>
             </div>
             <?php endif; ?>
@@ -180,7 +184,11 @@
                 </a>
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
-                    <span class="font-medium text-sm">Gestión de Personal</span>
+                    <span class="font-medium text-sm">Gestion de Personal</span>
+                </a>
+                <a href="/aulas" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-door text-xl"></i>
+                    <span class="font-medium text-sm">Aulas y Laboratorios</span>
                 </a>
                 <?php endif; ?>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
@@ -192,10 +200,11 @@
                     <i class="ph ph-calendar-check text-xl"></i>
                     <span class="font-medium text-sm">Control de Asistencia</span>
                 </a>
+
                 <div class="pt-6 mt-6 border-t border-gray-800">
                     <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                         <i class="ph ph-gear text-xl"></i>
-                        <span class="font-medium text-sm">Configuración</span>
+                        <span class="font-medium text-sm">Configuracion</span>
                     </a>
                 </div>
                 <?php endif; ?>

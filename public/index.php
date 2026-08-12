@@ -38,10 +38,18 @@ $router->post('restablecer', 'AuthController', 'resetPassword');
 $router->get('dashboard', 'DashboardController', 'index');
 $router->post('logout', 'AuthController', 'logout');
 
-// --- RUTAS: Gestión de Departamentos ---
+// --- RUTAS: Gestion de Departamentos ---
 $router->get('departamentos', 'DepartmentController', 'index');
 $router->get('departamentos/export-pdf', 'DepartmentController', 'exportPdf');
 $router->get('departamentos/export-pdf-coordinator', 'DepartmentController', 'exportPdfCoordinator');
+// --- RUTAS: Aulas y Laboratorios ---
+$router->get('aulas', 'AulaController', 'index');
+$router->post('aulas/store', 'AulaController', 'store');
+$router->post('aulas/update', 'AulaController', 'update');
+$router->post('aulas/toggle-status', 'AulaController', 'toggleStatus');
+$router->post('aulas/delete', 'AulaController', 'delete');
+$router->get('aulas/qr-svg', 'AulaController', 'qrSvg');
+$router->get('aulas/export-qr-pdf', 'AulaController', 'exportQrPdf');
 
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
