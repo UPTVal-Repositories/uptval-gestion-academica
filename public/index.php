@@ -36,6 +36,7 @@ $router->get('restablecer', 'AuthController', 'showResetPassword');
 $router->post('restablecer', 'AuthController', 'resetPassword');
 
 $router->get('dashboard', 'DashboardController', 'index');
+$router->get('documentacion', 'DocumentacionController', 'index');
 $router->post('logout', 'AuthController', 'logout');
 
 // --- RUTAS: Gestion de Departamentos ---
