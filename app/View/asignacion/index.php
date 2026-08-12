@@ -4,8 +4,9 @@
  * @var string $last_connection
  * @var int $page
  * @var int $totalPages
- * @var array $roleAssignments
- * @var array $roles
+ * @var array $assignments
+ * @var array $materias
+ * @var array $trayectos
  * @var array $userRoles
  */
 
@@ -18,7 +19,7 @@ unset($_SESSION['flash_message']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Permisos y Roles - UPTVal</title>
+    <title>Asignación Académica - UPTVal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
@@ -37,20 +38,17 @@ unset($_SESSION['flash_message']);
         }
     </script>
     <style>
-        /* Glassmorphism */
         .glass-panel {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
 
-        /* Scrollbar personalizado */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-        /* Menú móvil */
         .mobile-menu {
             transition: transform 0.3s ease-in-out;
             transform: translateX(-100%);
@@ -154,7 +152,7 @@ unset($_SESSION['flash_message']);
                     <?php endif; ?>
 
                     <?php if (in_array('Administrador', $userRoles)): ?>
-                    <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange shadow-[inset_0px_0px_20px_rgba(217,123,41,0.05)]">
                         <i class="ph ph-users text-xl"></i>
                         <span class="font-medium text-sm">Gestión de Personal</span>
                     </a>
@@ -206,7 +204,7 @@ unset($_SESSION['flash_message']);
                         <i class="ph ph-books text-xl"></i>
                         <span class="font-medium text-sm">Materias</span>
                     </a>
-                    <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                    <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange">
                         <i class="ph ph-users text-xl"></i>
                         <span class="font-medium text-sm">Gestión de Personal</span>
                     </a>
@@ -253,16 +251,17 @@ unset($_SESSION['flash_message']);
 
                 <header class="bg-white px-6 sm:px-8 py-5 shadow-sm border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Gestión de Personal</h2>
-                        <p class="text-sm text-gray-500 mt-1">Administra docentes, administrativos y asignaciones académicas.</p>
+                        <h2 class="text-2xl font-bold text-gray-900">Asignación Académica</h2>
+                        <p class="text-sm text-gray-500 mt-1">Asigna materias a los docentes. Un docente puede impartir varias materias y una materia puede ser impartida por varios docentes.</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <?php
-                            $pdfQuery = [];
-                            if (!empty($_GET['role_filter'])) $pdfQuery['role_filter'] = $_GET['role_filter'];
-                            if (!empty($_GET['status_filter'])) $pdfQuery['status_filter'] = $_GET['status_filter'];
-                            if (!empty($_GET['search'])) $pdfQuery['search'] = $_GET['search'];
-                            $pdfUrl = '/personal/permisos-roles/export-pdf' . (!empty($pdfQuery) ? '?' . http_build_query($pdfQuery) : '');
+                            $filterQuery = [];
+                            if (!empty($_GET['materia_filter'])) $filterQuery['materia_filter'] = $_GET['materia_filter'];
+                            if (!empty($_GET['trayecto_filter'])) $filterQuery['trayecto_filter'] = $_GET['trayecto_filter'];
+                            if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
+                            if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
+                            $pdfUrl = '/personal/asignacion-academica/export-pdf' . (!empty($filterQuery) ? '?' . http_build_query($filterQuery) : '');
                         ?>
                         <a href="<?= $pdfUrl ?>"
                            class="bg-white border border-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-50 w-full sm:w-auto">
@@ -270,8 +269,8 @@ unset($_SESSION['flash_message']);
                             Exportar PDF
                         </a>
                         <button onclick="openAssignModal()" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 transform hover:scale-105 w-full sm:w-auto">
-                            <i class="ph ph-user-plus text-lg"></i>
-                            Asignar/Quitar Rol
+                            <i class="ph ph-books text-lg"></i>
+                            Asignar Materia
                         </button>
                     </div>
                 </header>
@@ -286,36 +285,50 @@ unset($_SESSION['flash_message']);
                                     <i class="ph ph-users-three text-lg"></i>
                                     Directorio General
                                 </a>
-                                <a href="/personal/asignacion-academica" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                                <a href="/personal/asignacion-academica" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2" aria-current="page">
                                     <i class="ph ph-books text-lg"></i>
                                     Asignación Académica
                                 </a>
-                                <a href="/personal/permisos-roles" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2" aria-current="page">
+                                <a href="/personal/permisos-roles" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
                                     <i class="ph ph-shield-check text-lg"></i>
                                     Permisos y Roles
                                 </a>
                             </nav>
                         </div>
 
-                        <form method="GET" action="/personal/permisos-roles" class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <form method="GET" action="/personal/asignacion-academica" class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                             <div class="relative w-full sm:max-w-xs">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="ph ph-magnifying-glass text-gray-400"></i>
                                 </div>
-                                <input type="text" name="search" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula o nombre...">
+                                <input type="text" name="search" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula, docente, materia o código...">
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
 
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
-                                        Rol
+                                        Materia
                                     </label>
-                                    <select name="role_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
-                                        <option value="">Todos los Roles</option>
-                                        <?php foreach ($roles as $rol): ?>
-                                            <option value="<?php echo htmlspecialchars($rol['id_rol']); ?>" <?php echo (($_GET['role_filter'] ?? '') == $rol['id_rol']) ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($rol['name']); ?>
+                                    <select name="materia_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todas las Materias</option>
+                                        <?php foreach ($materias as $materia): ?>
+                                            <option value="<?php echo (int) $materia['id_materia']; ?>" <?php echo (($_GET['materia_filter'] ?? '') == $materia['id_materia']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($materia['codigo'] . ' - ' . $materia['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="relative">
+                                    <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                        Trayecto
+                                    </label>
+                                    <select name="trayecto_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todos los Trayectos</option>
+                                        <?php foreach ($trayectos as $trayecto): ?>
+                                            <option value="<?php echo (int) $trayecto['id_trayecto']; ?>" <?php echo (($_GET['trayecto_filter'] ?? '') == $trayecto['id_trayecto']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($trayecto['name']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -340,31 +353,33 @@ unset($_SESSION['flash_message']);
                                 <thead class="bg-gray-50">
                                     <tr class="text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <th scope="col" class="px-6 py-3 text-left">Cedula</th>
-                                        <th scope="col" class="px-6 py-3 text-left">Usuario</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Rol</th>
+                                        <th scope="col" class="px-6 py-3 text-left">Docente</th>
+                                        <th scope="col" class="px-6 py-3 text-left">Materia</th>
+                                        <th scope="col" class="px-6 py-3 text-left">Trayecto</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Duración</th>
                                         <th scope="col" class="px-6 py-3 text-center">Estatus</th>
-                                        <th scope="col" class="px-6 py-3 text-left">Departamento</th>
                                         <th scope="col" class="px-6 py-3 text-right">Fecha Asignación</th>
                                         <th scope="col" class="px-6 py-3 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($roleAssignments) && !empty($_GET['role_filter'] ?? $_GET['search'] ?? '')): ?>
+                                    <?php if (empty($assignments) && !empty($_GET['materia_filter'] ?? $_GET['trayecto_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? '')): ?>
                                         <tr>
-                                            <td colspan="7" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <td colspan="8" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
                                                 No se encontraron resultados con los filtros aplicados.
                                             </td>
                                         </tr>
-                                    <?php elseif (empty($roleAssignments)): ?>
+                                    <?php elseif (empty($assignments)): ?>
                                         <tr>
-                                            <td colspan="7" class="py-10 text-center text-gray-500 bg-gray-50">
-                                                <i class="ph ph-shield-slash text-5xl mb-3 block opacity-50"></i>
-                                                No hay usuarios con roles asignados en el sistema.
+                                            <td colspan="8" class="py-10 text-center text-gray-500 bg-gray-50">
+                                                <i class="ph ph-books text-5xl mb-3 block opacity-50"></i>
+                                                No hay asignaciones de materias registradas. <br>
+                                                Usa el botón "Asignar Materia" para comenzar.
                                             </td>
                                         </tr>
                                     <?php else: ?>
-                                        <?php foreach ($roleAssignments as $assignment): ?>
+                                        <?php foreach ($assignments as $assignment): ?>
                                             <?php
                                                 $initials = strtoupper(
                                                     substr($assignment['first_name'] ?? '?', 0, 1) .
@@ -373,10 +388,9 @@ unset($_SESSION['flash_message']);
                                                 $assignmentDate = !empty($assignment['assignment_date'])
                                                     ? date('d/m/Y', strtotime($assignment['assignment_date']))
                                                     : '---';
-                                                $assignmentState = $assignment['assignment_state'] ?? 'activo';
-                                                $isActive = $assignmentState === 'activo';
+                                                $isActive = ($assignment['assignment_state'] ?? 'activo') === 'activo';
                                             ?>
-                                            <tr data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>" class="hover:bg-gray-50 transition-colors <?php echo $isActive ? '' : 'opacity-60'; ?>">
+                                            <tr data-id-staff-materia="<?php echo (int) $assignment['id_staff_materia']; ?>" class="hover:bg-gray-50 transition-colors <?php echo $isActive ? '' : 'opacity-60'; ?>">
 
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-gray-900 font-mono">
@@ -402,9 +416,27 @@ unset($_SESSION['flash_message']);
                                                     </div>
                                                 </td>
 
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <?php echo htmlspecialchars($assignment['materia_name']); ?>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500 font-mono">
+                                                        <?php echo htmlspecialchars($assignment['codigo']); ?>
+                                                    </div>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="ph ph-squares-four text-slate-400"></i>
+                                                        <div class="text-sm text-gray-900">
+                                                            <?php echo htmlspecialchars($assignment['trayecto_name']); ?>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-uptval-orange/10 text-uptval-dark border border-uptval-orange/30">
-                                                        <?php echo htmlspecialchars($assignment['rol_name']); ?>
+                                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                                        <?php echo htmlspecialchars($assignment['duracion']); ?>
                                                     </span>
                                                 </td>
 
@@ -422,21 +454,6 @@ unset($_SESSION['flash_message']);
                                                     <?php endif; ?>
                                                 </td>
 
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <?php if (!empty($assignment['id_department'])): ?>
-                                                    <div class="flex items-center gap-1.5">
-                                                        <i class="ph ph-buildings text-slate-400"></i>
-                                                        <div class="text-sm text-gray-900">
-                                                            <?php echo htmlspecialchars($assignment['assignment_department_name'] ?? 'Sin Asignar'); ?>
-                                                        </div>
-                                                    </div>
-                                                    <?php else: ?>
-                                                    <div class="text-sm text-gray-900">
-                                                        <?php echo htmlspecialchars($assignment['department_name'] ?? 'Sin Asignar'); ?>
-                                                    </div>
-                                                    <?php endif; ?>
-                                                </td>
-
                                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                                     <div class="text-sm text-gray-900">
                                                         <?php echo htmlspecialchars($assignmentDate); ?>
@@ -446,24 +463,32 @@ unset($_SESSION['flash_message']);
                                                 <td data-toggle-action class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div class="flex items-center justify-end gap-2">
                                                         <?php if ($isActive): ?>
-                                                            <button type="button" onclick="confirmToggleRol(this)"
-                                                                    data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>"
-                                                                    data-rol-name="<?php echo htmlspecialchars($assignment['rol_name']); ?>"
+                                                            <button type="button" onclick="confirmToggleAsignacion(this)"
+                                                                    data-id-staff-materia="<?php echo (int) $assignment['id_staff_materia']; ?>"
+                                                                    data-materia-name="<?php echo htmlspecialchars($assignment['materia_name']); ?>"
                                                                     data-cedula="<?php echo htmlspecialchars($assignment['cedula']); ?>"
                                                                     data-current-state="activo"
-                                                                    class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar rol">
+                                                                    class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar asignación">
                                                                 <i class="ph ph-user-minus text-xl"></i>
                                                             </button>
                                                         <?php else: ?>
-                                                            <button type="button" onclick="confirmToggleRol(this)"
-                                                                    data-id-rol-user="<?php echo (int) $assignment['id_rol_user']; ?>"
-                                                                    data-rol-name="<?php echo htmlspecialchars($assignment['rol_name']); ?>"
+                                                            <button type="button" onclick="confirmToggleAsignacion(this)"
+                                                                    data-id-staff-materia="<?php echo (int) $assignment['id_staff_materia']; ?>"
+                                                                    data-materia-name="<?php echo htmlspecialchars($assignment['materia_name']); ?>"
                                                                     data-cedula="<?php echo htmlspecialchars($assignment['cedula']); ?>"
                                                                     data-current-state="inactivo"
-                                                                    class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar rol">
+                                                                    class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar asignación">
                                                                 <i class="ph ph-user-check text-xl"></i>
                                                             </button>
                                                         <?php endif; ?>
+
+                                                        <button type="button" onclick="confirmEliminarAsignacion(this)"
+                                                                data-id-staff-materia="<?php echo (int) $assignment['id_staff_materia']; ?>"
+                                                                data-materia-name="<?php echo htmlspecialchars($assignment['materia_name']); ?>"
+                                                                data-cedula="<?php echo htmlspecialchars($assignment['cedula']); ?>"
+                                                                class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar asignación">
+                                                            <i class="ph ph-trash text-xl"></i>
+                                                        </button>
                                                     </div>
                                                 </td>
 
@@ -477,14 +502,15 @@ unset($_SESSION['flash_message']);
                         <div class="flex items-center justify-center border-t border-gray-200 bg-gray-50/50 px-4 py-4 sm:px-6 w-full">
                             <?php
                                 $filterQuery = [];
-                                if (!empty($_GET['role_filter'])) $filterQuery['role_filter'] = $_GET['role_filter'];
+                                if (!empty($_GET['materia_filter'])) $filterQuery['materia_filter'] = $_GET['materia_filter'];
+                                if (!empty($_GET['trayecto_filter'])) $filterQuery['trayecto_filter'] = $_GET['trayecto_filter'];
                                 if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
                                 if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                                 $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';
                             ?>
                             <div class="flex items-center gap-6">
                                 <?php if ($page > 1): ?>
-                                    <a href="/personal/permisos-roles?page=<?= $page - 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    <a href="/personal/asignacion-academica?page=<?= $page - 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                                         Anterior
                                     </a>
                                 <?php else: ?>
@@ -501,7 +527,7 @@ unset($_SESSION['flash_message']);
                                 </div>
 
                                 <?php if ($page < $totalPages): ?>
-                                    <a href="/personal/permisos-roles?page=<?= $page + 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                    <a href="/personal/asignacion-academica?page=<?= $page + 1 ?><?= $filterQueryStr ?>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                                         Siguiente
                                     </a>
                                 <?php else: ?>
@@ -517,19 +543,19 @@ unset($_SESSION['flash_message']);
             </main>
         </div>
 
-    <div id="modalAsignarRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+    <div id="modalAsignarMateria" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
                 <div>
-                    <h3 class="text-lg font-bold">Asignar/Quitar Rol</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Un Personal puede tener varios roles (ej. Docente y Coordinador).</p>
+                    <h3 class="text-lg font-bold">Asignar Materia</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Un docente puede impartir varias materias y una materia puede ser impartida por varios docentes.</p>
                 </div>
-                <button onclick="toggleModal('modalAsignarRol')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="toggleModal('modalAsignarMateria')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 gap-5">
                     <div>
-                        <label for="search_cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula del staff</label>
+                        <label for="search_cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula del docente</label>
                         <div class="flex gap-2">
                             <input type="text" id="search_cedula" name="search_cedula" autocomplete="off"
                                    placeholder="Ej: 22224341"
@@ -545,55 +571,55 @@ unset($_SESSION['flash_message']);
                     <div id="assignResult"></div>
                 </div>
                 <div class="mt-6 pt-4 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
-                    <button type="button" onclick="toggleModal('modalAsignarRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cerrar</button>
+                    <button type="button" onclick="toggleModal('modalAsignarMateria')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cerrar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modalConfirmQuitarRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+    <div id="modalConfirmEliminarAsignacion" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
             <div class="px-6 pt-8 pb-6 text-center">
                 <div class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
                     <i class="ph ph-trash text-3xl text-red-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">¿Eliminar el rol?</h3>
+                <h3 class="text-xl font-bold text-gray-900">¿Eliminar la asignación?</h3>
                 <p class="mt-2 text-sm text-gray-500">
-                    Se eliminará el rol
-                    <span class="font-semibold text-uptval-dark" id="confirmRoleName"></span>
-                    al usuario
-                    <span class="font-semibold text-gray-900" id="confirmStaffName"></span>.
+                    Se eliminará la asignación de
+                    <span class="font-semibold text-uptval-dark" id="confirmEliminarMateriaName"></span>
+                    al docente
+                    <span class="font-semibold text-gray-900" id="confirmEliminarStaffName"></span>.
                     Esta acción no se puede deshacer.
                 </p>
             </div>
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
-                <button type="button" onclick="toggleModal('modalConfirmQuitarRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
-                <button type="button" id="confirmRemoveRoleBtn" onclick="confirmRemoveRoleAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
+                <button type="button" onclick="toggleModal('modalConfirmEliminarAsignacion')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="button" id="confirmEliminarAsignacionBtn" onclick="confirmEliminarAsignacionAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
                     <i class="ph ph-trash text-lg"></i>
-                    Sí, eliminar rol
+                    Sí, eliminar
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="modalConfirmToggleRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+    <div id="modalConfirmToggleAsignacion" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform modal-content overflow-hidden">
             <div class="px-6 pt-8 pb-6 text-center">
                 <div class="mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
                     <i class="ph ph-pause text-3xl text-amber-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">¿Desactivar el rol?</h3>
+                <h3 class="text-xl font-bold text-gray-900">¿Desactivar la asignación?</h3>
                 <p class="mt-2 text-sm text-gray-500">
-                    Se desactivará el rol
-                    <span class="font-semibold text-uptval-dark" id="confirmToggleRoleName"></span>
-                    al usuario
+                    Se desactivará la asignación de
+                    <span class="font-semibold text-uptval-dark" id="confirmToggleMateriaName"></span>
+                    al docente
                     <span class="font-semibold text-gray-900" id="confirmToggleStaffName"></span>.
-                    Podrá reactivarlo en cualquier momento.
+                    Podrá reactivarla en cualquier momento.
                 </p>
             </div>
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-2xl">
-                <button type="button" onclick="toggleModal('modalConfirmToggleRol')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
-                <button type="button" id="confirmToggleRoleBtn" onclick="confirmToggleRoleAction()" class="px-4 py-2 bg-uptval-orange hover:bg-uptval-dark text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
+                <button type="button" onclick="toggleModal('modalConfirmToggleAsignacion')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg w-full sm:w-auto">Cancelar</button>
+                <button type="button" id="confirmToggleAsignacionBtn" onclick="confirmToggleAsignacionAction()" class="px-4 py-2 bg-uptval-orange hover:bg-uptval-dark text-white font-medium rounded-lg shadow-md flex items-center justify-center gap-2 w-full sm:w-auto transition-colors">
                     <i class="ph ph-user-minus text-lg"></i>
                     Sí, desactivar
                 </button>
@@ -627,7 +653,6 @@ unset($_SESSION['flash_message']);
             if (window.innerWidth >= 768) closeMenuFunc();
         });
 
-        // Lógica del Modal
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
             const content = modal.querySelector('.modal-content');
@@ -648,11 +673,6 @@ unset($_SESSION['flash_message']);
             }
         }
 
-        // =========================================================
-        // LÓGICA DE ASIGNACIÓN DE ROL (BÚSQUEDA POR CÉDULA)
-        // =========================================================
-        const assignRoles = <?php echo json_encode($roles, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-
         function esc(value) {
             return String(value == null ? '' : value)
                 .replace(/&/g, '&amp;')
@@ -663,7 +683,7 @@ unset($_SESSION['flash_message']);
         }
 
         function loadingHtml() {
-            return '<div class="flex items-center justify-center gap-2 text-sm text-gray-500 py-4"><i class="ph ph-circle-notch ph-spin text-lg"></i>Buscando staff...</div>';
+            return '<div class="flex items-center justify-center gap-2 text-sm text-gray-500 py-4"><i class="ph ph-circle-notch ph-spin text-lg"></i>Buscando docente...</div>';
         }
 
         function alertHtml(type, message) {
@@ -678,7 +698,7 @@ unset($_SESSION['flash_message']);
         function openAssignModal() {
             document.getElementById('search_cedula').value = '';
             document.getElementById('assignResult').innerHTML = '';
-            toggleModal('modalAsignarRol');
+            toggleModal('modalAsignarMateria');
             setTimeout(() => document.getElementById('search_cedula').focus(), 100);
         }
 
@@ -697,7 +717,7 @@ unset($_SESSION['flash_message']);
             btn.disabled = true;
             result.innerHTML = loadingHtml();
 
-            fetch('/personal/permisos-roles/search-by-cedula?cedula=' + encodeURIComponent(cedula))
+            fetch('/personal/asignacion-academica/search-by-cedula?cedula=' + encodeURIComponent(cedula))
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (!data.ok) {
@@ -707,7 +727,7 @@ unset($_SESSION['flash_message']);
                     result.innerHTML = renderStaffResult(data);
                 })
                 .catch(function() {
-                    result.innerHTML = alertHtml('error', 'Ocurrió un error al buscar el staff. Intente nuevamente.');
+                    result.innerHTML = alertHtml('error', 'Ocurrió un error al buscar el docente. Intente nuevamente.');
                 })
                 .finally(function() { btn.disabled = false; });
         }
@@ -729,102 +749,98 @@ unset($_SESSION['flash_message']);
                 + statusBadge
                 + '</div></div>';
 
-            const currentRoleIds = data.role_ids || [];
+            const currentMateriaIds = data.materia_ids || [];
 
-            const rolesChips = (data.assignments || []).map(function(a) {
+            const materiasChips = (data.assignments || []).map(function(a) {
                 return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-uptval-orange/10 text-uptval-dark border border-uptval-orange/30">'
-                    + '<i class="ph ph-shield-check"></i>'
-                    + esc(a.name)
-                    + '<button type="button" title="Eliminar rol" data-rol-user-id="' + a.id_rol_user + '" data-rol-name="' + esc(a.name) + '" data-staff-name="' + esc(name) + '" onclick="removeRole(this)" class="p-0.5 rounded-full hover:bg-uptval-orange/20 text-gray-500 hover:text-red-600 transition-colors ml-0.5">'
+                    + '<i class="ph ph-books"></i>'
+                    + esc(a.codigo) + ' · ' + esc(a.name)
+                    + '<button type="button" title="Quitar materia" data-id-staff-materia="' + a.id_staff_materia + '" data-materia-name="' + esc(a.name) + '" data-staff-name="' + esc(name) + '" onclick="removeAsignacion(this)" class="p-0.5 rounded-full hover:bg-uptval-orange/20 text-gray-500 hover:text-red-600 transition-colors ml-0.5">'
                     + '<i class="ph ph-x text-sm"></i>'
                     + '</button>'
                     + '</span>';
             }).join('');
 
-            const availableRoles = assignRoles.filter(function(r) {
-                return currentRoleIds.indexOf(r.id_rol) === -1;
+            const availableMaterias = data.available_materias || [];
+            const available = availableMaterias.filter(function(m) {
+                return currentMateriaIds.indexOf(m.id_materia) === -1;
             });
 
             let html = card;
 
-            if (data.has_role) {
+            if (data.has_assignment) {
                 html += '<div class="mt-3">'
-                    + '<p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Roles asignados</p>'
-                    + '<div class="flex flex-wrap gap-2">' + rolesChips + '</div>'
+                    + '<p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Materias asignadas</p>'
+                    + '<div class="flex flex-wrap gap-2">' + materiasChips + '</div>'
                     + '</div>';
             }
 
-            if (availableRoles.length > 0) {
-                const roleOptions = availableRoles.map(function(r) {
-                    const isCoord = r.name === 'Coordinador' ? ' data-coordinator="1"' : '';
-                    return '<option value="' + r.id_rol + '"' + isCoord + '>' + esc(r.name) + '</option>';
+            if (available.length > 0) {
+                const groups = {};
+                available.forEach(function(m) {
+                    const key = m.trayecto_name || 'Sin trayecto';
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(m);
+                });
+
+                const options = Object.keys(groups).map(function(key) {
+                    const opts = groups[key].map(function(m) {
+                        return '<option value="' + m.id_materia + '">' + esc(m.codigo) + ' - ' + esc(m.name) + '</option>';
+                    }).join('');
+                    return '<optgroup label="' + esc(key) + '">' + opts + '</optgroup>';
                 }).join('');
 
-                const availableDepts = data.available_departments || [];
-                const deptOptions = availableDepts.map(function(d) {
-                    return '<option value="' + d.id_department + '">' + esc(d.name) + '</option>';
-                }).join('');
-
-                html += '<form method="POST" action="/personal/permisos-roles/store" class="mt-4">'
-                    + '<input type="hidden" name="id_user" value="' + s.id_user + '">'
+                html += '<form method="POST" action="/personal/asignacion-academica/store" class="mt-4">'
+                    + '<input type="hidden" name="id_staff" value="' + s.id_staff + '">'
                     + '<div>'
-                    + '<label for="assign_rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>'
-                    + '<select name="id_rol" id="assign_rol" required onchange="toggleDeptSelect(this)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
-                    + '<option value="">Seleccione un rol...</option>'
-                    + roleOptions
+                    + '<label for="assign_materia" class="block text-sm font-medium text-gray-700 mb-1">Materia</label>'
+                    + '<select name="id_materia" id="assign_materia" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
+                    + '<option value="">Seleccione una materia...</option>'
+                    + options
                     + '</select>'
                     + '</div>'
-                    + '<div id="assignDeptWrapper" class="hidden mt-4">'
-                    + '<label for="assign_dept" class="block text-sm font-medium text-gray-700 mb-1">Departamento a coordinar</label>'
-                    + '<select name="id_department" id="assign_dept" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
-                    + '<option value="">Seleccione un departamento...</option>'
-                    + deptOptions
-                    + '</select>'
-                    + '<div id="assignDeptEmpty" class="hidden mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">No hay departamentos disponibles para coordinar (todos tienen coordinador asignado).</div>'
-                    + '</div>'
-                    + '<button type="submit" class="mt-4 w-full px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Asignar Rol</button>'
+                    + '<button type="submit" class="mt-4 w-full px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Asignar Materia</button>'
                     + '</form>';
             } else {
-                html += alertHtml('info', data.has_role
-                    ? 'Este staff ya tiene todos los roles asignados.'
-                    : 'No hay roles disponibles para asignar.');
+                html += alertHtml('info', data.has_assignment
+                    ? 'Este docente ya tiene todas las materias activas asignadas.'
+                    : 'No hay materias activas disponibles para asignar.');
             }
 
             return html;
         }
 
-        let pendingRoleRemoval = null;
+        let pendingEliminar = null;
 
-        function removeRole(btn) {
-            const idRolUser = btn.getAttribute('data-rol-user-id');
-            const rolName = btn.getAttribute('data-rol-name');
-            const staffName = btn.getAttribute('data-staff-name');
+        function confirmEliminarAsignacion(btn) {
+            const idStaffMateria = btn.getAttribute('data-id-staff-materia');
+            const materiaName = btn.getAttribute('data-materia-name');
+            const cedula = btn.getAttribute('data-cedula');
 
-            if (!idRolUser) return;
+            if (!idStaffMateria) return;
 
-            document.getElementById('confirmRoleName').innerText = rolName;
-            document.getElementById('confirmStaffName').innerText = staffName;
-            pendingRoleRemoval = { btn: btn, idRolUser: idRolUser };
+            document.getElementById('confirmEliminarMateriaName').innerText = materiaName;
+            document.getElementById('confirmEliminarStaffName').innerText = 'C.I ' + cedula;
+            pendingEliminar = { idStaffMateria: idStaffMateria };
 
-            toggleModal('modalConfirmQuitarRol');
+            toggleModal('modalConfirmEliminarAsignacion');
         }
 
-        function confirmRemoveRoleAction() {
-            if (!pendingRoleRemoval) return;
+        function confirmEliminarAsignacionAction() {
+            if (!pendingEliminar) return;
 
-            const btn = pendingRoleRemoval.btn;
-            const idRolUser = pendingRoleRemoval.idRolUser;
-            pendingRoleRemoval = null;
+            const idStaffMateria = pendingEliminar.idStaffMateria;
+            pendingEliminar = null;
 
-            toggleModal('modalConfirmQuitarRol');
+            toggleModal('modalConfirmEliminarAsignacion');
+            performEliminar(idStaffMateria);
+        }
 
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-
+        function performEliminar(idStaffMateria) {
             const formData = new FormData();
-            formData.append('id_rol_user', idRolUser);
+            formData.append('id_staff_materia', idStaffMateria);
 
-            fetch('/personal/permisos-roles/delete', {
+            fetch('/personal/asignacion-academica/delete', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
@@ -832,25 +848,35 @@ unset($_SESSION['flash_message']);
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (data.ok) {
-                        showToast('success', data.title || 'Rol eliminado', data.message || 'La asignación del rol fue eliminada correctamente.');
-                        searchByCedula();
-                        removeRowFromTable(idRolUser);
+                        showToast('success', data.title || 'Asignación eliminada', data.message || 'La asignación de la materia fue eliminada correctamente.');
+                        removeRowFromTable(idStaffMateria);
+                        const modal = document.getElementById('modalAsignarMateria');
+                        if (modal && !modal.classList.contains('hidden')) {
+                            searchByCedula();
+                        }
                     } else {
-                        btn.disabled = false;
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        showToast('error', data.title || 'No se pudo eliminar el rol', data.message || 'Ocurrió un error al eliminar el rol.');
+                        showToast('error', data.title || 'No se pudo eliminar', data.message || 'Ocurrió un error al eliminar la asignación.');
                     }
                 })
                 .catch(function() {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    showToast('error', 'Error al eliminar el rol', 'Ocurrió un error inesperado. Intente nuevamente.');
+                    showToast('error', 'Error al eliminar', 'Ocurrió un error inesperado. Intente nuevamente.');
                 });
         }
 
-        // =========================================================
-        // LÓGICA DE DESACTIVAR/ACTIVAR ROL (TOGGLE DE ESTATUS)
-        // =========================================================
+        function removeAsignacion(btn) {
+            const idStaffMateria = btn.getAttribute('data-id-staff-materia');
+            const materiaName = btn.getAttribute('data-materia-name');
+            const staffName = btn.getAttribute('data-staff-name');
+
+            if (!idStaffMateria) return;
+
+            document.getElementById('confirmEliminarMateriaName').innerText = materiaName;
+            document.getElementById('confirmEliminarStaffName').innerText = staffName;
+            pendingEliminar = { idStaffMateria: idStaffMateria };
+
+            toggleModal('modalConfirmEliminarAsignacion');
+        }
+
         function statusBadgeHtml(state) {
             if (state === 'activo') {
                 return '<span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700 border border-green-300">'
@@ -860,64 +886,45 @@ unset($_SESSION['flash_message']);
                 + '<span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo</span>';
         }
 
-        function toggleActionHtml(idRolUser, state, rolName, cedula) {
-            if (state === 'activo') {
-                return '<button type="button" onclick="confirmToggleRol(this)"'
-                    + ' data-id-rol-user="' + idRolUser + '"'
-                    + ' data-rol-name="' + esc(rolName) + '"'
-                    + ' data-cedula="' + esc(cedula) + '"'
-                    + ' data-current-state="activo"'
-                    + ' class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar rol">'
-                    + '<i class="ph ph-user-minus text-xl"></i></button>';
-            }
-            return '<button type="button" onclick="confirmToggleRol(this)"'
-                + ' data-id-rol-user="' + idRolUser + '"'
-                + ' data-rol-name="' + esc(rolName) + '"'
-                + ' data-cedula="' + esc(cedula) + '"'
-                + ' data-current-state="inactivo"'
-                + ' class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar rol">'
-                + '<i class="ph ph-user-check text-xl"></i></button>';
-        }
-
         let pendingToggle = null;
 
-        function confirmToggleRol(btn) {
-            const idRolUser = btn.getAttribute('data-id-rol-user');
+        function confirmToggleAsignacion(btn) {
+            const idStaffMateria = btn.getAttribute('data-id-staff-materia');
             const currentState = btn.getAttribute('data-current-state');
 
-            if (!idRolUser) return;
+            if (!idStaffMateria) return;
 
             if (currentState === 'inactivo') {
-                performToggle(idRolUser, 'activo', btn);
+                performToggleAsignacion(idStaffMateria, 'activo', btn);
                 return;
             }
 
-            document.getElementById('confirmToggleRoleName').innerText = btn.getAttribute('data-rol-name');
+            document.getElementById('confirmToggleMateriaName').innerText = btn.getAttribute('data-materia-name');
             document.getElementById('confirmToggleStaffName').innerText = 'C.I ' + btn.getAttribute('data-cedula');
-            pendingToggle = { idRolUser: idRolUser, btn: btn };
+            pendingToggle = { idStaffMateria: idStaffMateria, btn: btn };
 
-            toggleModal('modalConfirmToggleRol');
+            toggleModal('modalConfirmToggleAsignacion');
         }
 
-        function confirmToggleRoleAction() {
+        function confirmToggleAsignacionAction() {
             if (!pendingToggle) return;
 
-            const idRolUser = pendingToggle.idRolUser;
+            const idStaffMateria = pendingToggle.idStaffMateria;
             const btn = pendingToggle.btn;
             pendingToggle = null;
 
-            toggleModal('modalConfirmToggleRol');
-            performToggle(idRolUser, 'inactivo', btn);
+            toggleModal('modalConfirmToggleAsignacion');
+            performToggleAsignacion(idStaffMateria, 'inactivo', btn);
         }
 
-        function performToggle(idRolUser, newState, btn) {
+        function performToggleAsignacion(idStaffMateria, newState, btn) {
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
 
             const formData = new FormData();
-            formData.append('id_rol_user', idRolUser);
+            formData.append('id_staff_materia', idStaffMateria);
 
-            fetch('/personal/permisos-roles/toggle-status', {
+            fetch('/personal/asignacion-academica/toggle-status', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
@@ -925,8 +932,8 @@ unset($_SESSION['flash_message']);
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (data.ok) {
-                        showToast('success', data.title || 'Rol actualizado', data.message || 'El estatus del rol fue actualizado correctamente.');
-                        updateRowAfterToggle(idRolUser, newState);
+                        showToast('success', data.title || 'Asignación actualizada', data.message || 'El estatus de la asignación fue actualizado correctamente.');
+                        updateRowAfterToggle(idStaffMateria, newState);
                     } else {
                         btn.disabled = false;
                         btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -940,8 +947,8 @@ unset($_SESSION['flash_message']);
                 });
         }
 
-        function updateRowAfterToggle(idRolUser, newState) {
-            const row = document.querySelector('tr[data-id-rol-user="' + idRolUser + '"]');
+        function updateRowAfterToggle(idStaffMateria, newState) {
+            const row = document.querySelector('tr[data-id-staff-materia="' + idStaffMateria + '"]');
             if (!row) {
                 location.reload();
                 return;
@@ -954,43 +961,48 @@ unset($_SESSION['flash_message']);
 
             const actionCell = row.querySelector('[data-toggle-action]');
             if (actionCell) {
-                const currentBtn = row.querySelector('button[data-id-rol-user="' + idRolUser + '"]');
-                const rolName = currentBtn ? currentBtn.getAttribute('data-rol-name') : '';
+                const currentBtn = row.querySelector('button[data-id-staff-materia="' + idStaffMateria + '"]');
+                const materiaName = currentBtn ? currentBtn.getAttribute('data-materia-name') : '';
                 const cedula = currentBtn ? currentBtn.getAttribute('data-cedula') : '';
-                actionCell.innerHTML = toggleActionHtml(idRolUser, newState, rolName, cedula);
+
+                let html;
+                if (newState === 'activo') {
+                    html = '<button type="button" onclick="confirmToggleAsignacion(this)"'
+                        + ' data-id-staff-materia="' + idStaffMateria + '"'
+                        + ' data-materia-name="' + esc(materiaName) + '"'
+                        + ' data-cedula="' + esc(cedula) + '"'
+                        + ' data-current-state="activo"'
+                        + ' class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Desactivar asignación">'
+                        + '<i class="ph ph-user-minus text-xl"></i></button>';
+                } else {
+                    html = '<button type="button" onclick="confirmToggleAsignacion(this)"'
+                        + ' data-id-staff-materia="' + idStaffMateria + '"'
+                        + ' data-materia-name="' + esc(materiaName) + '"'
+                        + ' data-cedula="' + esc(cedula) + '"'
+                        + ' data-current-state="inactivo"'
+                        + ' class="text-green-500 hover:text-green-600 transition-colors p-1" title="Activar asignación">'
+                        + '<i class="ph ph-user-check text-xl"></i></button>';
+                }
+
+                html += '<button type="button" onclick="confirmEliminarAsignacion(this)"'
+                    + ' data-id-staff-materia="' + idStaffMateria + '"'
+                    + ' data-materia-name="' + esc(materiaName) + '"'
+                    + ' data-cedula="' + esc(cedula) + '"'
+                    + ' class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar asignación">'
+                    + '<i class="ph ph-trash text-xl"></i></button>';
+
+                actionCell.innerHTML = html;
             }
         }
 
-        function removeRowFromTable(idRolUser) {
-            const rows = document.querySelectorAll('tr[data-id-rol-user="' + idRolUser + '"]');
+        function removeRowFromTable(idStaffMateria) {
+            const rows = document.querySelectorAll('tr[data-id-staff-materia="' + idStaffMateria + '"]');
             rows.forEach(function(row) { row.remove(); });
 
             const tbody = document.querySelector('table tbody');
-            const remaining = tbody ? tbody.querySelectorAll('tr[data-id-rol-user]').length : 0;
+            const remaining = tbody ? tbody.querySelectorAll('tr[data-id-staff-materia]').length : 0;
             if (remaining === 0) {
                 location.reload();
-            }
-        }
-
-        function toggleDeptSelect(select) {
-            const wrapper = document.getElementById('assignDeptWrapper');
-            if (!wrapper) return;
-
-            const deptSelect = document.getElementById('assign_dept');
-            const deptEmpty = document.getElementById('assignDeptEmpty');
-            const option = select.options[select.selectedIndex];
-            const isCoord = option ? option.getAttribute('data-coordinator') === '1' : false;
-
-            if (isCoord) {
-                wrapper.classList.remove('hidden');
-                deptSelect.disabled = false;
-                deptSelect.setAttribute('required', 'required');
-                if (deptEmpty) deptEmpty.classList.toggle('hidden', deptSelect.options.length > 1);
-            } else {
-                wrapper.classList.add('hidden');
-                deptSelect.disabled = true;
-                deptSelect.removeAttribute('required');
-                if (deptEmpty) deptEmpty.classList.add('hidden');
             }
         }
 

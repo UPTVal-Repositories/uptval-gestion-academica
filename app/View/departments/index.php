@@ -142,6 +142,11 @@ unset($_SESSION['flash_message']);
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
                 </a>
 
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
+                    <i class="ph ph-books text-xl"></i>
+                    <span class="font-medium text-sm">Materias</span>
+                </a>
+
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 border-l-2 border-transparent hover:border-gray-500">
                     <i class="ph ph-users text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Personal</span>
@@ -189,6 +194,10 @@ unset($_SESSION['flash_message']);
                 <a href="/departamentos" class="flex items-center gap-3 px-4 py-3 text-uptval-orange bg-uptval-orange/10 rounded-xl transition-all duration-300 border-l-2 border-uptval-orange">
                     <i class="ph ph-buildings text-xl"></i>
                     <span class="font-medium text-sm">Gestión de Departamentos</span>
+                </a>
+                <a href="/materias" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                    <i class="ph ph-books text-xl"></i>
+                    <span class="font-medium text-sm">Materias</span>
                 </a>
                 <a href="/personal" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
                     <i class="ph ph-users text-xl"></i>
