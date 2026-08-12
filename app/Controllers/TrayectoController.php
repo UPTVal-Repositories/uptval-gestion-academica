@@ -5,6 +5,7 @@ namespace Controllers;
 use Core\Session;
 use Models\Materia;
 use Models\Trayecto;
+use Models\Especialidad;
 
 class TrayectoController
 {
@@ -40,6 +41,7 @@ class TrayectoController
 
         $trayectos = Trayecto::filter($filters, $limit, $offset);
         $materias = [];
+        $especialidades = Especialidad::all();
         $duraciones = MateriaController::DURACIONES;
         $activeTab = 'trayectos';
 

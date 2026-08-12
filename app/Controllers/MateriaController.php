@@ -5,6 +5,7 @@ namespace Controllers;
 use Core\Session;
 use Models\Materia;
 use Models\Trayecto;
+use Models\Especialidad;
 
 class MateriaController
 {
@@ -23,10 +24,11 @@ class MateriaController
         $userRoles = Session::get('user_roles') ?? [];
 
         $filters = [
-            'id_trayecto' => $_GET['trayecto_filter'] ?? null,
-            'duracion'    => $_GET['duracion_filter'] ?? null,
-            'status'      => $_GET['status_filter'] ?? null,
-            'search'      => $_GET['search'] ?? null
+            'id_trayecto'     => $_GET['trayecto_filter'] ?? null,
+            'id_especialidad' => $_GET['especialidad_filter'] ?? null,
+            'duracion'        => $_GET['duracion_filter'] ?? null,
+            'status'          => $_GET['status_filter'] ?? null,
+            'search'          => $_GET['search'] ?? null
         ];
 
         $limit = 10;
@@ -44,6 +46,7 @@ class MateriaController
 
         $materias = Materia::filter($filters, $limit, $offset);
         $trayectos = Trayecto::all();
+        $especialidades = Especialidad::all();
         $duraciones = self::DURACIONES;
         $activeTab = 'materias';
 
@@ -62,35 +65,41 @@ class MateriaController
             exit;
         }
 
-        $codigo     = trim($_POST['codigo'] ?? '');
-        $name       = trim($_POST['name'] ?? '');
-        $duracion   = $_POST['duracion'] ?? '';
-        $idTrayecto = $_POST['id_trayecto'] ?? null;
+        $codigo         = trim($_POST['codigo'] ?? '');
+        $name           = trim($_POST['name'] ?? '');
+        $duracion       = $_POST['duracion'] ?? '';
+        $idTrayecto     = $_POST['id_trayecto'] ?? null;
+        $idEspecialidad = $_POST['id_especialidad'] ?? null;
 
         if ($codigo === '' || $name === '' || !ctype_digit((string) $idTrayecto)) {
-            self::respondOrRedirect('error', 'Datos no válidos', 'Debe completar el código, el nombre y el trayecto de la materia.', '/materias');
+            self::respondOrRedirect('error', 'Datos no validos', 'Debe completar el codigo, el nombre y el trayecto de la materia.', '/materias');
         }
 
         if (!in_array($duracion, self::DURACIONES, true)) {
-            self::respondOrRedirect('error', 'Duración no válida', 'Seleccione una duración válida para la materia.', '/materias');
+            self::respondOrRedirect('error', 'Duracion no valida', 'Seleccione una duracion valida para la materia.', '/materias');
         }
 
         if (!Trayecto::findById((int) $idTrayecto)) {
             self::respondOrRedirect('error', 'Trayecto no encontrado', 'El trayecto seleccionado no existe en el sistema.', '/materias');
         }
 
+        if (!empty($idEspecialidad) && ctype_digit((string) $idEspecialidad) && !Especialidad::findById((int) $idEspecialidad)) {
+            self::respondOrRedirect('error', 'Especialidad no encontrada', 'La especialidad seleccionada no existe en el sistema.', '/materias');
+        }
+
         if (Materia::findByCodigo($codigo)) {
-            self::respondOrRedirect('error', 'Código duplicado', 'Ya existe una materia registrada con ese código.', '/materias');
+            self::respondOrRedirect('error', 'Codigo duplicado', 'Ya existe una materia registrada con ese codigo.', '/materias');
         }
 
         try {
             Materia::create([
-                'codigo'      => $codigo,
-                'name'        => $name,
-                'duracion'    => $duracion,
-                'id_trayecto' => (int) $idTrayecto
+                'codigo'          => $codigo,
+                'name'            => $name,
+                'duracion'        => $duracion,
+                'id_trayecto'     => (int) $idTrayecto,
+                'id_especialidad' => !empty($idEspecialidad) && ctype_digit((string) $idEspecialidad) ? (int) $idEspecialidad : null
             ]);
-            self::respondOrRedirect('success', 'Materia registrada', 'La materia se registró correctamente en el sistema.', '/materias');
+            self::respondOrRedirect('success', 'Materia registrada', 'La materia se registro correctamente en el sistema.', '/materias');
         } catch (\PDOException $e) {
             error_log("Error registrando materia: " . $e->getMessage());
             self::respondOrRedirect('error', 'Error al registrar', 'Ocurrió un error inesperado al registrar la materia.', '/materias');
@@ -120,17 +129,18 @@ class MateriaController
             self::respondOrRedirect('error', 'Materia no encontrada', 'La materia solicitada no existe en el sistema.', '/materias');
         }
 
-        $codigo     = trim($_POST['codigo'] ?? '');
-        $name       = trim($_POST['name'] ?? '');
-        $duracion   = $_POST['duracion'] ?? '';
-        $idTrayecto = $_POST['id_trayecto'] ?? null;
+        $codigo         = trim($_POST['codigo'] ?? '');
+        $name           = trim($_POST['name'] ?? '');
+        $duracion       = $_POST['duracion'] ?? '';
+        $idTrayecto     = $_POST['id_trayecto'] ?? null;
+        $idEspecialidad = $_POST['id_especialidad'] ?? null;
 
         if ($codigo === '' || $name === '' || !ctype_digit((string) $idTrayecto)) {
-            self::respondOrRedirect('error', 'Datos no válidos', 'Debe completar el código, el nombre y el trayecto de la materia.', '/materias');
+            self::respondOrRedirect('error', 'Datos no validos', 'Debe completar el codigo, el nombre y el trayecto de la materia.', '/materias');
         }
 
         if (!in_array($duracion, self::DURACIONES, true)) {
-            self::respondOrRedirect('error', 'Duración no válida', 'Seleccione una duración válida para la materia.', '/materias');
+            self::respondOrRedirect('error', 'Duracion no valida', 'Seleccione una duracion valida para la materia.', '/materias');
         }
 
         if (!Trayecto::findById((int) $idTrayecto)) {
@@ -139,15 +149,16 @@ class MateriaController
 
         $existing = Materia::findByCodigo($codigo);
         if ($existing && (int) $existing['id_materia'] !== (int) $id) {
-            self::respondOrRedirect('error', 'Código duplicado', 'Ya existe otra materia registrada con ese código.', '/materias');
+            self::respondOrRedirect('error', 'Codigo duplicado', 'Ya existe otra materia registrada con ese codigo.', '/materias');
         }
 
         try {
             Materia::update((int) $id, [
-                'codigo'      => $codigo,
-                'name'        => $name,
-                'duracion'    => $duracion,
-                'id_trayecto' => (int) $idTrayecto
+                'codigo'          => $codigo,
+                'name'            => $name,
+                'duracion'        => $duracion,
+                'id_trayecto'     => (int) $idTrayecto,
+                'id_especialidad' => !empty($idEspecialidad) && ctype_digit((string) $idEspecialidad) ? (int) $idEspecialidad : null
             ]);
             self::respondOrRedirect('success', 'Materia actualizada', 'La materia se actualizó correctamente.', '/materias');
         } catch (\PDOException $e) {

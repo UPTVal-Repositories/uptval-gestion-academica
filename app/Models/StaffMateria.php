@@ -22,13 +22,16 @@ class StaffMateria
                 m.duracion,
                 m.status as materia_status,
                 t.name as trayecto_name,
-                t.id_trayecto
+                t.id_trayecto,
+                e.name as especialidad_name,
+                e.id_especialidad
             FROM
                 staff_materia sm
             INNER JOIN staff s ON sm.id_staff = s.id_staff
             INNER JOIN `user` u ON s.id_user = u.id_user
             INNER JOIN materia m ON sm.id_materia = m.id_materia
-            INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto";
+            INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto
+            LEFT JOIN especialidad e ON m.id_especialidad = e.id_especialidad";
 
     public static function countFilter($filters = [])
     {
@@ -44,6 +47,10 @@ class StaffMateria
             $where[] = "m.id_trayecto = :trayecto";
             $params[':trayecto'] = $filters['id_trayecto'];
         }
+        if (!empty($filters['id_especialidad'])) {
+            $where[] = "m.id_especialidad = :especialidad";
+            $params[':especialidad'] = $filters['id_especialidad'];
+        }
         if (!empty($filters['state'])) {
             $where[] = "sm.assignment_state = :state";
             $params[':state'] = $filters['state'];
@@ -58,7 +65,8 @@ class StaffMateria
                 INNER JOIN staff s ON sm.id_staff = s.id_staff
                 INNER JOIN `user` u ON s.id_user = u.id_user
                 INNER JOIN materia m ON sm.id_materia = m.id_materia
-                INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto";
+                INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto
+                LEFT JOIN especialidad e ON m.id_especialidad = e.id_especialidad";
 
         if (!empty($where)) {
             $sql .= " WHERE " . implode(" AND ", $where);
@@ -85,6 +93,10 @@ class StaffMateria
         if (!empty($filters['id_trayecto'])) {
             $where[] = "m.id_trayecto = :trayecto";
             $params[':trayecto'] = $filters['id_trayecto'];
+        }
+        if (!empty($filters['id_especialidad'])) {
+            $where[] = "m.id_especialidad = :especialidad";
+            $params[':especialidad'] = $filters['id_especialidad'];
         }
         if (!empty($filters['state'])) {
             $where[] = "sm.assignment_state = :state";
@@ -125,12 +137,13 @@ class StaffMateria
     {
         $db = Database::getInstance();
         $query = "SELECT sm.id_staff_materia, sm.id_materia, sm.assignment_state,
-                         m.name, m.codigo, m.duracion, t.name as trayecto_name
+                         m.name, m.codigo, m.duracion, t.name as trayecto_name, e.name as especialidad_name
                   FROM staff_materia sm
                   INNER JOIN materia m ON sm.id_materia = m.id_materia
                   INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto
+                  LEFT JOIN especialidad e ON m.id_especialidad = e.id_especialidad
                   WHERE sm.id_staff = :id_staff
-                  ORDER BY t.id_trayecto ASC, m.name ASC";
+                  ORDER BY t.id_trayecto ASC, e.name ASC, m.name ASC";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':id_staff', (int) $idStaff, PDO::PARAM_INT);
         $stmt->execute();
@@ -140,12 +153,13 @@ class StaffMateria
     public static function getActiveAssignmentsByStaff($idStaff)
     {
         $db = Database::getInstance();
-        $query = "SELECT sm.id_staff_materia, sm.id_materia, m.name, m.codigo, m.duracion, t.name as trayecto_name
+        $query = "SELECT sm.id_staff_materia, sm.id_materia, m.name, m.codigo, m.duracion, t.name as trayecto_name, e.name as especialidad_name
                   FROM staff_materia sm
                   INNER JOIN materia m ON sm.id_materia = m.id_materia
                   INNER JOIN trayecto t ON m.id_trayecto = t.id_trayecto
+                  LEFT JOIN especialidad e ON m.id_especialidad = e.id_especialidad
                   WHERE sm.id_staff = :id_staff AND sm.assignment_state = 'activo'
-                  ORDER BY t.id_trayecto ASC, m.name ASC";
+                  ORDER BY t.id_trayecto ASC, e.name ASC, m.name ASC";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':id_staff', (int) $idStaff, PDO::PARAM_INT);
         $stmt->execute();

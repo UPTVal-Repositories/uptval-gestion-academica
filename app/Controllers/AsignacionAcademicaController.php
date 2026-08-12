@@ -6,6 +6,7 @@ use Core\Session;
 use Models\Staff;
 use Models\Materia;
 use Models\Trayecto;
+use Models\Especialidad;
 use Models\StaffMateria;
 use Dompdf\Dompdf;
 
@@ -23,10 +24,11 @@ class AsignacionAcademicaController
         $last_connection = !empty($last_connection_raw) ? date('d/m/Y - h:i a', strtotime($last_connection_raw)) : '';
 
         $filters = [
-            'id_materia'   => $_GET['materia_filter'] ?? null,
-            'id_trayecto'  => $_GET['trayecto_filter'] ?? null,
-            'state'        => $_GET['status_filter'] ?? null,
-            'search'       => $_GET['search'] ?? null
+            'id_materia'      => $_GET['materia_filter'] ?? null,
+            'id_trayecto'     => $_GET['trayecto_filter'] ?? null,
+            'id_especialidad' => $_GET['especialidad_filter'] ?? null,
+            'state'           => $_GET['status_filter'] ?? null,
+            'search'          => $_GET['search'] ?? null
         ];
 
         $limit = 10;
@@ -45,6 +47,7 @@ class AsignacionAcademicaController
         $assignments = StaffMateria::filter($filters, $limit, $offset);
         $materias = Materia::allActive();
         $trayectos = Trayecto::all();
+        $especialidades = Especialidad::allActive();
         $userRoles = Session::get('user_roles') ?? [];
 
         require_once __DIR__ . '/../View/asignacion/index.php';
@@ -249,10 +252,11 @@ class AsignacionAcademicaController
         $cedula = Session::get('cedula');
 
         $filters = [
-            'id_materia'  => $_GET['materia_filter'] ?? null,
-            'id_trayecto' => $_GET['trayecto_filter'] ?? null,
-            'state'       => $_GET['status_filter'] ?? null,
-            'search'      => $_GET['search'] ?? null
+            'id_materia'      => $_GET['materia_filter'] ?? null,
+            'id_trayecto'     => $_GET['trayecto_filter'] ?? null,
+            'id_especialidad' => $_GET['especialidad_filter'] ?? null,
+            'state'           => $_GET['status_filter'] ?? null,
+            'search'          => $_GET['search'] ?? null
         ];
 
         $assignments = StaffMateria::filter($filters);
@@ -311,6 +315,7 @@ class AsignacionAcademicaController
                         <th>Docente</th>
                         <th>Materia</th>
                         <th>Trayecto</th>
+                        <th>Especialidad</th>
                         <th>Duracion</th>
                         <th>Estatus</th>
                         <th>Fecha Asignacion</th>
@@ -328,6 +333,7 @@ class AsignacionAcademicaController
                     <td>' . htmlspecialchars(trim(($assignment['last_name'] ?? '') . ', ' . ($assignment['first_name'] ?? ''))) . '</td>
                     <td>' . htmlspecialchars($assignment['materia_name']) . ' (' . htmlspecialchars($assignment['codigo']) . ')</td>
                     <td>' . htmlspecialchars($assignment['trayecto_name']) . '</td>
+                    <td>' . htmlspecialchars($assignment['especialidad_name'] ?? 'Sin asignar') . '</td>
                     <td>' . htmlspecialchars($assignment['duracion']) . '</td>
                     <td>' . $state . '</td>
                     <td>' . $assignmentDate . '</td>

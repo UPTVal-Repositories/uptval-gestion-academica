@@ -7,6 +7,7 @@
  * @var array $assignments
  * @var array $materias
  * @var array $trayectos
+ * @var array $especialidades
  * @var array $userRoles
  */
 
@@ -259,6 +260,7 @@ unset($_SESSION['flash_message']);
                             $filterQuery = [];
                             if (!empty($_GET['materia_filter'])) $filterQuery['materia_filter'] = $_GET['materia_filter'];
                             if (!empty($_GET['trayecto_filter'])) $filterQuery['trayecto_filter'] = $_GET['trayecto_filter'];
+                            if (!empty($_GET['especialidad_filter'])) $filterQuery['especialidad_filter'] = $_GET['especialidad_filter'];
                             if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
                             if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                             $pdfUrl = '/personal/asignacion-academica/export-pdf' . (!empty($filterQuery) ? '?' . http_build_query($filterQuery) : '');
@@ -304,7 +306,7 @@ unset($_SESSION['flash_message']);
                                 <input type="text" name="search" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Buscar por cédula, docente, materia o código...">
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full">
 
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
@@ -336,6 +338,20 @@ unset($_SESSION['flash_message']);
 
                                 <div class="relative">
                                     <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
+                                        Especialidad
+                                    </label>
+                                    <select name="especialidad_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
+                                        <option value="">Todas las Especialidades</option>
+                                        <?php foreach ($especialidades as $esp): ?>
+                                            <option value="<?php echo (int) $esp['id_especialidad']; ?>" <?php echo (($_GET['especialidad_filter'] ?? '') == $esp['id_especialidad']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($esp['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="relative">
+                                    <label class="absolute -top-2.5 left-3 px-1 bg-white text-[10px] font-bold text-uptval-black tracking-wider pointer-events-none z-10">
                                         Estatus
                                     </label>
                                     <select name="status_filter" onchange="this.form.submit()" class="w-full pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-uptval-blue focus:border-uptval-blue bg-white transition-all">
@@ -356,26 +372,27 @@ unset($_SESSION['flash_message']);
                                         <th scope="col" class="px-6 py-3 text-left">Docente</th>
                                         <th scope="col" class="px-6 py-3 text-left">Materia</th>
                                         <th scope="col" class="px-6 py-3 text-left">Trayecto</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Duración</th>
+                                        <th scope="col" class="px-6 py-3 text-left">Especialidad</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Duracion</th>
                                         <th scope="col" class="px-6 py-3 text-center">Estatus</th>
-                                        <th scope="col" class="px-6 py-3 text-right">Fecha Asignación</th>
+                                        <th scope="col" class="px-6 py-3 text-right">Fecha Asignacion</th>
                                         <th scope="col" class="px-6 py-3 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($assignments) && !empty($_GET['materia_filter'] ?? $_GET['trayecto_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? '')): ?>
+                                    <?php if (empty($assignments) && !empty($_GET['materia_filter'] ?? $_GET['trayecto_filter'] ?? $_GET['especialidad_filter'] ?? $_GET['status_filter'] ?? $_GET['search'] ?? '')): ?>
                                         <tr>
-                                            <td colspan="8" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <td colspan="9" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-funnel text-5xl mb-3 block opacity-50"></i>
                                                 No se encontraron resultados con los filtros aplicados.
                                             </td>
                                         </tr>
                                     <?php elseif (empty($assignments)): ?>
                                         <tr>
-                                            <td colspan="8" class="py-10 text-center text-gray-500 bg-gray-50">
+                                            <td colspan="9" class="py-10 text-center text-gray-500 bg-gray-50">
                                                 <i class="ph ph-books text-5xl mb-3 block opacity-50"></i>
                                                 No hay asignaciones de materias registradas. <br>
-                                                Usa el botón "Asignar Materia" para comenzar.
+                                                Usa el boton "Asignar Materia" para comenzar.
                                             </td>
                                         </tr>
                                     <?php else: ?>
@@ -430,6 +447,15 @@ unset($_SESSION['flash_message']);
                                                         <i class="ph ph-squares-four text-slate-400"></i>
                                                         <div class="text-sm text-gray-900">
                                                             <?php echo htmlspecialchars($assignment['trayecto_name']); ?>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="ph ph-graduation-cap text-slate-400"></i>
+                                                        <div class="text-sm text-gray-900">
+                                                            <?php echo htmlspecialchars($assignment['especialidad_name'] ?? 'Sin asignar'); ?>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -504,6 +530,7 @@ unset($_SESSION['flash_message']);
                                 $filterQuery = [];
                                 if (!empty($_GET['materia_filter'])) $filterQuery['materia_filter'] = $_GET['materia_filter'];
                                 if (!empty($_GET['trayecto_filter'])) $filterQuery['trayecto_filter'] = $_GET['trayecto_filter'];
+                                if (!empty($_GET['especialidad_filter'])) $filterQuery['especialidad_filter'] = $_GET['especialidad_filter'];
                                 if (!empty($_GET['status_filter'])) $filterQuery['status_filter'] = $_GET['status_filter'];
                                 if (!empty($_GET['search'])) $filterQuery['search'] = $_GET['search'];
                                 $filterQueryStr = !empty($filterQuery) ? '&' . http_build_query($filterQuery) : '';

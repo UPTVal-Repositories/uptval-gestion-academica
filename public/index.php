@@ -69,6 +69,11 @@ $router->post('materias/trayectos/store', 'TrayectoController', 'store');
 $router->post('materias/trayectos/update', 'TrayectoController', 'update');
 $router->post('materias/trayectos/toggle-status', 'TrayectoController', 'toggleStatus');
 $router->post('materias/trayectos/delete', 'TrayectoController', 'delete');
+$router->get('materias/especialidades', 'EspecialidadController', 'index');
+$router->post('materias/especialidades/store', 'EspecialidadController', 'store');
+$router->post('materias/especialidades/update', 'EspecialidadController', 'update');
+$router->post('materias/especialidades/toggle-status', 'EspecialidadController', 'toggleStatus');
+$router->post('materias/especialidades/delete', 'EspecialidadController', 'delete');
 $router->post('personal/store', 'StaffController', 'store');
 $router->post('personal/update', 'StaffController', 'update');
 
