@@ -41,6 +41,18 @@ class RolUser
         return array_column($rows, 'name');
     }
 
+    public static function getRoleIdsByUserId($idUser)
+    {
+        $db = Database::getInstance();
+        $query = "SELECT ru.id_rol
+                  FROM rol_user ru
+                  WHERE ru.id_user = :id_user AND ru.assignment_state = 'activo'";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id_user', (int) $idUser, PDO::PARAM_INT);
+        $stmt->execute();
+        return array_map('intval', array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'id_rol'));
+    }
+
     public static function countFilter($filters = []) {
         $db = Database::getInstance();
         $where = [];

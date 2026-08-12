@@ -493,7 +493,10 @@ unset($_SESSION['flash_message']);
     <div id="modalAsignarRol" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
-                <h3 class="text-lg font-bold">Asignar Rol</h3>
+                <div>
+                    <h3 class="text-lg font-bold">Asignar Rol</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Un staff puede tener varios roles (ej. Docente y Coordinador).</p>
+                </div>
                 <button onclick="toggleModal('modalAsignarRol')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
             <div class="p-6">
@@ -649,32 +652,51 @@ unset($_SESSION['flash_message']);
                 + statusBadge
                 + '</div></div>';
 
+            const currentRoleIds = data.role_ids || [];
+
+            const rolesChips = (data.roles || []).map(function(r) {
+                return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-uptval-orange/10 text-uptval-dark border border-uptval-orange/30">'
+                    + '<i class="ph ph-shield-check"></i>'
+                    + esc(r)
+                    + '</span>';
+            }).join('');
+
+            const availableRoles = assignRoles.filter(function(r) {
+                return currentRoleIds.indexOf(r.id_rol) === -1;
+            });
+
+            let html = card;
+
             if (data.has_role) {
-                const rolesList = data.roles.map(esc).join(', ');
-                return card
-                    + '<div class="rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 mt-3 text-sm">'
-                    + '<p class="font-semibold">Este staff ya tiene rol asignado:</p>'
-                    + '<p class="mt-1">' + rolesList + '</p>'
-                    + '<p class="mt-1 text-amber-700">No se puede asignar otro rol a este registro.</p>'
+                html += '<div class="mt-3">'
+                    + '<p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Roles asignados</p>'
+                    + '<div class="flex flex-wrap gap-2">' + rolesChips + '</div>'
                     + '</div>';
             }
 
-            const roleOptions = assignRoles.map(function(r) {
-                return '<option value="' + r.id_rol + '">' + esc(r.name) + '</option>';
-            }).join('');
+            if (availableRoles.length > 0) {
+                const roleOptions = availableRoles.map(function(r) {
+                    return '<option value="' + r.id_rol + '">' + esc(r.name) + '</option>';
+                }).join('');
 
-            return card
-                + '<form method="POST" action="/personal/permisos-roles/store" class="mt-4">'
-                + '<input type="hidden" name="id_user" value="' + s.id_user + '">'
-                + '<div>'
-                + '<label for="assign_rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>'
-                + '<select name="id_rol" id="assign_rol" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
-                + '<option value="">Seleccione un rol...</option>'
-                + roleOptions
-                + '</select>'
-                + '</div>'
-                + '<button type="submit" class="mt-4 w-full px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Asignar Rol</button>'
-                + '</form>';
+                html += '<form method="POST" action="/personal/permisos-roles/store" class="mt-4">'
+                    + '<input type="hidden" name="id_user" value="' + s.id_user + '">'
+                    + '<div>'
+                    + '<label for="assign_rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>'
+                    + '<select name="id_rol" id="assign_rol" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
+                    + '<option value="">Seleccione un rol...</option>'
+                    + roleOptions
+                    + '</select>'
+                    + '</div>'
+                    + '<button type="submit" class="mt-4 w-full px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Asignar Rol</button>'
+                    + '</form>';
+            } else {
+                html += alertHtml('info', data.has_role
+                    ? 'Este staff ya tiene todos los roles asignados.'
+                    : 'No hay roles disponibles para asignar.');
+            }
+
+            return html;
         }
 
         const icons = {

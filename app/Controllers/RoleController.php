@@ -79,6 +79,7 @@ class RoleController{
         }
 
         $activeRoles = RolUser::getRolesByUserId((int) $staff['id_user']);
+        $activeRoleIds = RolUser::getRoleIdsByUserId((int) $staff['id_user']);
 
         echo json_encode([
             'ok'       => true,
@@ -91,6 +92,7 @@ class RoleController{
                 'status'          => $staff['status']
             ],
             'roles'    => $activeRoles,
+            'role_ids' => $activeRoleIds,
             'has_role' => count($activeRoles) > 0
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         exit;
