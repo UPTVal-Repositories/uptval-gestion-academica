@@ -120,4 +120,98 @@ class DepartmentController{
         $dompdf->stream('directorio_departamentos_' . date('Ymd_His') . '.pdf', ['Attachment' => true]);
         exit;
     }
+
+    public function exportPdfCoordinator() {
+
+        if (!Session::has('id_user')) {
+            header("Location: /login");
+            exit;
+        }
+
+        $id = $_GET['id_department'] ?? null;
+
+        if ($id === null || !ctype_digit((string) $id)) {
+            $_SESSION['flash_message'] = [
+                'type'    => 'error',
+                'title'   => 'Registro no encontrado',
+                'message' => 'El identificador del departamento no es válido.'
+            ];
+            header("Location: /departamentos");
+            exit;
+        }
+
+        $depto = Department::findWithCoordinator((int) $id);
+
+        if (!$depto) {
+            $_SESSION['flash_message'] = [
+                'type'    => 'error',
+                'title'   => 'Registro no encontrado',
+                'message' => 'El departamento solicitado no existe en la base de datos.'
+            ];
+            header("Location: /departamentos");
+            exit;
+        }
+
+        $cedula = Session::get('cedula');
+        $generatedBy = "C.I: " . htmlspecialchars($cedula ?? '---');
+        $dateTime = date('d/m/Y - h:i A');
+
+        $coordinator = !empty($depto['coordinator_cedula'])
+            ? trim(($depto['coordinator_last_name'] ?? '') . ', ' . ($depto['coordinator_first_name'] ?? ''))
+            : 'Sin coordinador asignado';
+        $coordinatorCedula = $depto['coordinator_cedula'] ?? '---';
+        $coordinatorDate = !empty($depto['coordinator_assignment_date'])
+            ? date('d/m/Y', strtotime($depto['coordinator_assignment_date']))
+            : '---';
+
+        $html = '<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Coordinador del Departamento - UPTVal</title>
+            <style>
+                body { font-family: DejaVu Sans, sans-serif; font-size: 10pt; color: #1e293b; margin: 0; padding: 30px; }
+                .header { text-align: center; border-bottom: 2px solid #d97b29; padding-bottom: 12px; margin-bottom: 20px; }
+                .header h1 { margin: 0; font-size: 18pt; color: #0f172a; }
+                .header h1 span { color: #d97b29; }
+                .header p { margin: 4px 0 0; font-size: 9pt; color: #64748b; }
+                .title { text-align: center; font-size: 13pt; font-weight: bold; color: #0f172a; margin: 16px 0 20px; }
+                .meta { font-size: 8pt; color: #475569; margin-bottom: 20px; }
+                .meta span { display: inline-block; margin-right: 24px; }
+                table.data { width: 100%; border-collapse: collapse; }
+                table.data td { border: 1px solid #e2e8f0; padding: 9px 12px; font-size: 10pt; }
+                table.data td.label { width: 35%; background-color: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.5px; }
+                table.data td.value { color: #0f172a; font-weight: 600; }
+                .footer { margin-top: 30px; font-size: 8pt; color: #94a3b8; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1><span>UPT</span>Val</h1>
+                <p>Universidad Politecnica Territorial de Valencia</p>
+            </div>
+            <div class="meta">
+                <span><strong>Generado por:</strong> ' . $generatedBy . '</span>
+                <span><strong>Fecha:</strong> ' . $dateTime . '</span>
+            </div>
+            <div class="title">Coordinador del Departamento</div>
+            <table class="data">
+                <tr><td class="label">Departamento</td><td class="value">' . htmlspecialchars($depto['name']) . '</td></tr>
+                <tr><td class="label">Coordinador</td><td class="value">' . htmlspecialchars($coordinator) . '</td></tr>
+                <tr><td class="label">Cedula</td><td class="value">' . htmlspecialchars($coordinatorCedula) . '</td></tr>
+                <tr><td class="label">Fecha de Asignacion</td><td class="value">' . $coordinatorDate . '</td></tr>
+            </table>
+            <div class="footer">Documento generado por el Sistema de Gestion Academica UPTVal.</div>
+        </body>
+        </html>';
+
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'coordinador_' . preg_replace('/[^A-Za-z0-9]/', '_', strtolower($depto['name'])) . '_' . date('Ymd_His') . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => true]);
+        exit;
+    }
 }

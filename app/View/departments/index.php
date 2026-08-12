@@ -269,6 +269,7 @@ unset($_SESSION['flash_message']);
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Departamento</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">N.º de Personal</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100">
@@ -299,6 +300,14 @@ unset($_SESSION['flash_message']);
                                         <span class="text-sm font-semibold text-gray-900"><?php echo (int) $depto['staff_count']; ?></span>
                                         <span class="text-xs text-gray-400 ml-1">personas</span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button" onclick="viewCoordinator(<?php echo (int) $depto['id_department']; ?>)"
+                                                    class="text-slate-400 hover:text-uptval-orange transition-colors p-1" title="Ver coordinador del departamento">
+                                                <i class="ph ph-eye text-xl"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -307,6 +316,48 @@ unset($_SESSION['flash_message']);
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="modalCoordinador" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform scale-95 transition-transform modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 text-gray-800">
+                <div>
+                    <h3 class="text-lg font-bold">Coordinador del Departamento</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Información de la asignación de coordinación.</p>
+                </div>
+                <button onclick="toggleModal('modalCoordinador')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <div id="coord_no_result" class="hidden flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-4 py-3 text-sm">
+                    <i class="ph ph-warning-circle text-lg mt-0.5"></i>
+                    <span>Este departamento no tiene coordinador asignado.</span>
+                </div>
+                <div id="coord_result" class="grid grid-cols-1 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <div id="coord_department" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 text-sm"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Coordinador</label>
+                        <div id="coord_name" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 text-sm"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                        <div id="coord_cedula" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 text-sm font-mono"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Asignación</label>
+                        <div id="coord_date" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between gap-3 rounded-b-2xl">
+                <a id="coordPdfButton" href="#" class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md text-center flex items-center justify-center gap-2">
+                    <i class="ph ph-file-pdf text-lg text-red-500"></i> Descargar PDF
+                </a>
+                <button type="button" onclick="toggleModal('modalCoordinador')" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -335,6 +386,73 @@ unset($_SESSION['flash_message']);
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) closeMenuFunc();
         });
+
+        // =========================================================
+        // LÓGICA DEL MODAL
+        // =========================================================
+        function toggleModal(modalID) {
+            const modal = document.getElementById(modalID);
+            const content = modal.querySelector('.modal-content');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 150);
+            }
+        }
+
+        // =========================================================
+        // LÓGICA DE VER COORDINADOR (MODAL)
+        // =========================================================
+        const departmentData = <?php echo json_encode($departamentos, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+        function viewCoordinator(id) {
+            const record = departmentData.find(function(item) {
+                return parseInt(item.id_department, 10) === parseInt(id, 10);
+            });
+
+            if (!record) {
+                showToast('error', 'Departamento no encontrado', 'El departamento solicitado no está en la página actual.');
+                return;
+            }
+
+            document.getElementById('coord_department').innerText = record.name || '';
+            document.getElementById('coord_name').innerText = record.coordinator_first_name
+                ? ((record.coordinator_last_name || '') + ', ' + record.coordinator_first_name)
+                : '-';
+            document.getElementById('coord_cedula').innerText = record.coordinator_cedula || '-';
+            document.getElementById('coord_date').innerText = record.coordinator_assignment_date
+                ? new Date(record.coordinator_assignment_date.replace(' ', 'T')).toLocaleDateString('es-VE', {
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                  })
+                : '-';
+
+            const pdfButton = document.getElementById('coordPdfButton');
+            if (record.coordinator_cedula) {
+                pdfButton.classList.remove('hidden');
+                pdfButton.href = '/departamentos/export-pdf-coordinator?id_department=' + encodeURIComponent(record.id_department);
+            } else {
+                pdfButton.classList.add('hidden');
+            }
+
+            const noResult = document.getElementById('coord_no_result');
+            if (record.coordinator_cedula) {
+                noResult.classList.add('hidden');
+            } else {
+                noResult.classList.remove('hidden');
+            }
+
+            toggleModal('modalCoordinador');
+        }
 
         // =========================================================
         // LÓGICA DE NOTIFICACIONES (TOASTS)

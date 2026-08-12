@@ -7,6 +7,7 @@ use Models\Rol;
 use Models\RolUser;
 use Models\Staff;
 use Models\User;
+use Models\Department;
 use Dompdf\Dompdf;
 
 class RoleController{
@@ -80,6 +81,7 @@ class RoleController{
 
         $activeRoles = RolUser::getRolesByUserId((int) $staff['id_user']);
         $activeRoleIds = RolUser::getRoleIdsByUserId((int) $staff['id_user']);
+        $availableDepartments = Department::availableForCoordinator();
 
         echo json_encode([
             'ok'       => true,
@@ -91,9 +93,10 @@ class RoleController{
                 'department_name' => $staff['department_name'],
                 'status'          => $staff['status']
             ],
-            'roles'    => $activeRoles,
-            'role_ids' => $activeRoleIds,
-            'has_role' => count($activeRoles) > 0
+            'roles'                 => $activeRoles,
+            'role_ids'              => $activeRoleIds,
+            'has_role'              => count($activeRoles) > 0,
+            'available_departments' => $availableDepartments
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         exit;
     }
@@ -165,8 +168,34 @@ class RoleController{
             exit;
         }
 
+        $idDepartment = $_POST['id_department'] ?? null;
+
+        if ($rol['name'] === 'Coordinador') {
+            if ($idDepartment === null || $idDepartment === '' || !ctype_digit((string) $idDepartment)) {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Departamento requerido',
+                    'message' => 'Debe seleccionar el departamento que coordinará el staff.'
+                ];
+                header("Location: /personal/permisos-roles");
+                exit;
+            }
+
+            if (!Department::findById((int) $idDepartment)) {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Departamento no encontrado',
+                    'message' => 'El departamento seleccionado no existe en el sistema.'
+                ];
+                header("Location: /personal/permisos-roles");
+                exit;
+            }
+        } else {
+            $idDepartment = null;
+        }
+
         try {
-            $result = RolUser::assign((int) $idUser, (int) $idRol);
+            $result = RolUser::assign((int) $idUser, (int) $idRol, $rol['name'], $idDepartment !== null ? (int) $idDepartment : null);
 
             if ($result === 'assigned') {
                 $_SESSION['flash_message'] = [
@@ -179,6 +208,12 @@ class RoleController{
                     'type'    => 'success',
                     'title'   => 'Rol reactivado',
                     'message' => 'La asignación previa del rol fue reactivada.'
+                ];
+            } elseif ($result === 'department_taken') {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Departamento ocupado',
+                    'message' => 'El departamento seleccionado ya tiene un coordinador asignado.'
                 ];
             } else {
                 $_SESSION['flash_message'] = [
@@ -323,12 +358,26 @@ class RoleController{
         }
 
         try {
-            RolUser::reactivate((int) $id);
-            $_SESSION['flash_message'] = [
-                'type'    => 'success',
-                'title'   => 'Rol reactivado',
-                'message' => 'La asignación del rol volvió a estado activo.'
-            ];
+            $result = RolUser::reactivate((int) $id);
+            if ($result === 'department_taken') {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Departamento ocupado',
+                    'message' => 'No se puede reactivar la asignación: el departamento ya tiene otro coordinador activo.'
+                ];
+            } elseif ($result === 'not_found') {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'error',
+                    'title'   => 'Asignación no reactivable',
+                    'message' => 'La asignación del rol no pudo ser reactivada.'
+                ];
+            } else {
+                $_SESSION['flash_message'] = [
+                    'type'    => 'success',
+                    'title'   => 'Rol reactivado',
+                    'message' => 'La asignación del rol volvió a estado activo.'
+                ];
+            }
         } catch (\PDOException $e) {
             error_log("Error reactivando rol: " . $e->getMessage());
             $_SESSION['flash_message'] = [
@@ -423,11 +472,14 @@ class RoleController{
                 $assignmentDate = !empty($assignment['assignment_date'])
                     ? date('d/m/Y', strtotime($assignment['assignment_date']))
                     : '---';
+                $departmentCell = !empty($assignment['id_department'])
+                    ? htmlspecialchars($assignment['assignment_department_name'] ?? 'Sin Asignar')
+                    : htmlspecialchars($assignment['department_name'] ?? 'Sin Asignar');
                 $html .= '<tr>
                     <td>' . htmlspecialchars($assignment['cedula']) . '</td>
                     <td>' . htmlspecialchars(trim(($assignment['last_name'] ?? '') . ', ' . ($assignment['first_name'] ?? ''))) . '</td>
                     <td>' . htmlspecialchars($assignment['rol_name']) . '</td>
-                    <td>' . htmlspecialchars($assignment['department_name'] ?? 'Sin Asignar') . '</td>
+                    <td>' . $departmentCell . '</td>
                     <td>' . $state . '</td>
                     <td>' . $assignmentDate . '</td>
                 </tr>';

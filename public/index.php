@@ -41,6 +41,7 @@ $router->post('logout', 'AuthController', 'logout');
 // --- RUTAS: Gestión de Departamentos ---
 $router->get('departamentos', 'DepartmentController', 'index');
 $router->get('departamentos/export-pdf', 'DepartmentController', 'exportPdf');
+$router->get('departamentos/export-pdf-coordinator', 'DepartmentController', 'exportPdfCoordinator');
 
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');

@@ -397,9 +397,18 @@ unset($_SESSION['flash_message']);
                                                 </td>
 
                                                 <td class="px-6 py-4 whitespace-nowrap">
+                                                    <?php if (!empty($assignment['id_department'])): ?>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="ph ph-buildings text-slate-400"></i>
+                                                        <div class="text-sm text-gray-900">
+                                                            <?php echo htmlspecialchars($assignment['assignment_department_name'] ?? 'Sin Asignar'); ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php else: ?>
                                                     <div class="text-sm text-gray-900">
                                                         <?php echo htmlspecialchars($assignment['department_name'] ?? 'Sin Asignar'); ?>
                                                     </div>
+                                                    <?php endif; ?>
                                                 </td>
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -676,17 +685,31 @@ unset($_SESSION['flash_message']);
 
             if (availableRoles.length > 0) {
                 const roleOptions = availableRoles.map(function(r) {
-                    return '<option value="' + r.id_rol + '">' + esc(r.name) + '</option>';
+                    const isCoord = r.name === 'Coordinador' ? ' data-coordinator="1"' : '';
+                    return '<option value="' + r.id_rol + '"' + isCoord + '>' + esc(r.name) + '</option>';
+                }).join('');
+
+                const availableDepts = data.available_departments || [];
+                const deptOptions = availableDepts.map(function(d) {
+                    return '<option value="' + d.id_department + '">' + esc(d.name) + '</option>';
                 }).join('');
 
                 html += '<form method="POST" action="/personal/permisos-roles/store" class="mt-4">'
                     + '<input type="hidden" name="id_user" value="' + s.id_user + '">'
                     + '<div>'
                     + '<label for="assign_rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>'
-                    + '<select name="id_rol" id="assign_rol" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
+                    + '<select name="id_rol" id="assign_rol" required onchange="toggleDeptSelect(this)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
                     + '<option value="">Seleccione un rol...</option>'
                     + roleOptions
                     + '</select>'
+                    + '</div>'
+                    + '<div id="assignDeptWrapper" class="hidden mt-4">'
+                    + '<label for="assign_dept" class="block text-sm font-medium text-gray-700 mb-1">Departamento a coordinar</label>'
+                    + '<select name="id_department" id="assign_dept" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none bg-white text-gray-900">'
+                    + '<option value="">Seleccione un departamento...</option>'
+                    + deptOptions
+                    + '</select>'
+                    + '<div id="assignDeptEmpty" class="hidden mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">No hay departamentos disponibles para coordinar (todos tienen coordinador asignado).</div>'
                     + '</div>'
                     + '<button type="submit" class="mt-4 w-full px-4 py-2 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">Asignar Rol</button>'
                     + '</form>';
@@ -697,6 +720,28 @@ unset($_SESSION['flash_message']);
             }
 
             return html;
+        }
+
+        function toggleDeptSelect(select) {
+            const wrapper = document.getElementById('assignDeptWrapper');
+            if (!wrapper) return;
+
+            const deptSelect = document.getElementById('assign_dept');
+            const deptEmpty = document.getElementById('assignDeptEmpty');
+            const option = select.options[select.selectedIndex];
+            const isCoord = option ? option.getAttribute('data-coordinator') === '1' : false;
+
+            if (isCoord) {
+                wrapper.classList.remove('hidden');
+                deptSelect.disabled = false;
+                deptSelect.setAttribute('required', 'required');
+                if (deptEmpty) deptEmpty.classList.toggle('hidden', deptSelect.options.length > 1);
+            } else {
+                wrapper.classList.add('hidden');
+                deptSelect.disabled = true;
+                deptSelect.removeAttribute('required');
+                if (deptEmpty) deptEmpty.classList.add('hidden');
+            }
         }
 
         const icons = {
