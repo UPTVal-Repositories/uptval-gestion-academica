@@ -38,6 +38,10 @@ $router->post('restablecer', 'AuthController', 'resetPassword');
 $router->get('dashboard', 'DashboardController', 'index');
 $router->post('logout', 'AuthController', 'logout');
 
+// --- RUTAS: Gestión de Departamentos ---
+$router->get('departamentos', 'DepartmentController', 'index');
+$router->get('departamentos/export-pdf', 'DepartmentController', 'exportPdf');
+
 // --- NUEVA RUTA: Gestión de Personal ---
 $router->get('personal/export-pdf', 'StaffController', 'exportPdf');
 $router->get('personal/export-pdf-one', 'StaffController', 'exportPdfOne');
