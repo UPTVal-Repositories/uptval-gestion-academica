@@ -131,7 +131,7 @@ docker run --rm -w /var/www/html -v "$(pwd):/var/www/html" php:8.2-cli sh -c "cu
 # 5. Ejecutar las migraciones (ver sección Base de Datos)
 ```
 
-La aplicación queda disponible en **http://localhost** y MySQL en **localhost:3310**.
+La aplicación queda disponible en **http://54.235.45.135/** y MySQL en **localhost:3310**.
 
 ---
 
